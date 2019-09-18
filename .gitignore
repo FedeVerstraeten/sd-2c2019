@@ -1,3 +1,6 @@
 # VHDL
 *.o
 *.cf
+
+# Test folder
+test/*
