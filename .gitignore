@@ -2,5 +2,4 @@
 *.o
 *.cf
 
-# Test folder
-test/*
+# Folder
