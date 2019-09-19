@@ -1,6 +1,10 @@
 # Sumador de N bits en VHDL
 
-- Tener creada la estructura de directorios:
+- El programa en VHDL posee un código sumador de Nbit que llama a otro código sumador de 1bit.
+- Por defecto se prueba con N=4 bits.
+- Testeado con ghdl+GTKWave,funcionando OK.
+
+- Para ejecutar, previamente se debe tener creada la estructura de directorios:
 ```
 # Directorios
 src/ --> código fuente vhdl
@@ -26,9 +30,7 @@ $ make view TESTBENCH=sum_nb_tb
 # All
 $ make TESTBENCH=sum_nb_tb
 ```
-- Testeado con ghdl+GTKWave,funcionando OK.
-- El programa en VHDL posee un código sumador de Nbit que llama a otro código sumador de 1bit.
-- Por defecto se prueba con N=4 bits.
+
 - Valores cargados para las entradas a=3 y b=5.
 
 ```
