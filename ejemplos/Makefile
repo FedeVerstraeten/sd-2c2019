@@ -34,10 +34,12 @@ endif
 	@mv $(TESTBENCH) simulation/$(TESTBENCH)
 
 run:
-	@$(SIMDIR)/$(TESTBENCH) $(GHDL_SIM_OPT) --vcdgz=$(SIMDIR)/$(TESTBENCH).vcdgz
+	$(SIMDIR)/$(TESTBENCH) $(GHDL_SIM_OPT) --vcdgz=$(SIMDIR)/$(TESTBENCH).vcdgz
 
 view:
 	gunzip --stdout $(SIMDIR)/$(TESTBENCH).vcdgz | $(WAVEFORM_VIEWER) --vcd
 
 clean :
 	$(GHDL_CMD) --clean --workdir=simulation
+	rm -f ./*.o $(SIMDIR)/*.o $(SIMDIR)/*.cf $(SIMDIR)/*.vcdgz
+
