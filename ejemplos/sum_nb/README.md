@@ -3,7 +3,7 @@
 - Tener creada la estructura de directorios:
 ```
 # Directorios
-src/ --> código funte vhdl
+src/ --> código fuente vhdl
 simulation/ --> inicialmente vacía
 testbench/ --> código vhdl que ejecuta el testbench
 
