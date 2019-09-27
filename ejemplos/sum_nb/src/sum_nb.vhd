@@ -28,6 +28,7 @@ begin
   c_aux(0) <= ci;
   co <= c_aux(N);
   
+  -- Conecto cada i-esimo sumador de 1bit al siguiente
   sumGen: for i in 0 to N-1 generate
     sum1b_i: entity work.sum_1b
       port map(
