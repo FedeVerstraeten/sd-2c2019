@@ -1,0 +1,1 @@
+Agregar al proyecto el componente a probar y el archivo de pruebas
