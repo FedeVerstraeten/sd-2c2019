@@ -18,14 +18,15 @@
 -- Clock(clk) and Reset(rst) input signal is not necessary
 --
 -- 32|    31|30          23|22                    0|
---   | sign |   exponent   |      significand      |
+--   | sign |   exponent   |       mantissa        |
 --
 -- Part         | # bits
 -- -----------------------
 -- sign         |    1
 -- exponent     |    8
--- significand  |   23
+-- mantissa     |   23
 -- TOTAL        |   32 
+--
 ----------------------------------------------------------------------------------
 -- Dependencies:
 -- 
@@ -42,9 +43,10 @@ use IEEE.numeric_std.all;
 
 entity fp_multiplier is
   
+  -- Default constants value
   generic(
-    FP_EXP: integer:= 7;
-    FP_LEN: integer:= 25
+    FP_EXP: integer:= 8;
+    FP_LEN: integer:= 32
   );
 
   port(
@@ -73,8 +75,8 @@ begin
     variable significand_a_times_b_2F_plus_2_length: unsigned( (2*(FP_LEN-FP_EXP))-1 downto 0) := (others => '0');
     variable significand_a_times_b: unsigned ( (FP_LEN-(FP_EXP+1)) - 1 downto 0) := (others => '0');
     
-    variable exponent_a: unsigned(FP_EXP-1 downto 0);
-    variable exponent_b: unsigned(FP_EXP-1 downto 0);
+    variable exp_a: unsigned(FP_EXP-1 downto 0);
+    variable exp_b: unsigned(FP_EXP-1 downto 0);
     variable exp_res: unsigned (FP_EXP-1 downto 0);
     
     variable exp_bias: integer := (2**(FP_EXP-1)) - 1;
@@ -97,11 +99,11 @@ begin
       end if;
       
       -- Exponent calculation
-      exponent_a :=  ( unsigned(a_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(exp_bias,FP_EXP) );
-      exponent_b :=  ( unsigned(b_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(exp_bias,FP_EXP) );
-      exp_res := (exponent_a + exponent_b + to_unsigned(exp_bias,FP_EXP) + to_unsigned(exp_increase,FP_EXP));  
+      exp_a :=  ( unsigned(a_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(exp_bias,FP_EXP) );
+      exp_b :=  ( unsigned(b_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(exp_bias,FP_EXP) );
+      exp_res := (exp_a + exp_b + to_unsigned(exp_bias,FP_EXP) + to_unsigned(exp_increase,FP_EXP));  
       
-      -- Carga exponente y mantisa
+      -- Load exponent and mantissa
       s_out(FP_LEN-2 downto 0) <=  std_logic_vector(exp_res) & std_logic_vector(significand_a_times_b);  
   end process;
 
