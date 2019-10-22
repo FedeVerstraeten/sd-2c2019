@@ -13,7 +13,7 @@ entity sum_nb is
     co: out std_logic
   );
   
-  -- Mapeo de pines
+  -- Mapeo de pines de la FPGA
   attribute LOC: string;
   attribute LOC of a: signal is "K17 K18 H18 G18";
   attribute LOC of b: signal is "R17 N17 L13 L14";
