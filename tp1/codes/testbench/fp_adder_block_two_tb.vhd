@@ -80,10 +80,20 @@ begin
   --    file_close(f);
   --end process Test_Sequence;
   
-  -- test_sum_float_25_7.txt
-  -- 24930363 24788495 25003842
-  --a_tb <= std_logic_vector(to_unsigned(8153147,25));
-  --b_tb <= std_logic_vector(to_unsigned(24788495,25));
+  -- Block one entry
+  -- a_tb <= std_logic_vector(to_unsigned(8153147,25));
+  -- b_tb <= std_logic_vector(to_unsigned(24788495,25))
+  -- a_in = 8153147
+  -- b_in = 24788495
+  -- sign_a = 0
+  -- sign_b = 1 
+  -- exp_a = 62
+  -- exp_b = 61
+  -- significand_a = 157755
+  -- significand_b = 115185 (complement2)
+  -- significand_a_plus_b_with_carry = 346419
+  -- flag_g = 1
+
   sign_a_q1 <= '0';
   sign_b_q1 <= '1';
   exponent_a_q1 <= to_unsigned(62,7);

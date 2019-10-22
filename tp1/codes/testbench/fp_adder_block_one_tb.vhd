@@ -80,7 +80,9 @@ begin
   
   -- test_sum_float_25_7.txt
   -- 24930363 24788495 25003842
-  a_tb <= std_logic_vector(to_unsigned(8153147,25));
+  --a_tb <= std_logic_vector(to_unsigned(8153147,25));
+  --b_tb <= std_logic_vector(to_unsigned(24788495,25));
+  a_tb <= std_logic_vector(to_unsigned(24930363,25));
   b_tb <= std_logic_vector(to_unsigned(24788495,25));
 
   -- Instanciacion del DUT
