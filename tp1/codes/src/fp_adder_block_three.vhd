@@ -10,124 +10,54 @@ entity fp_adder_block_three is
   );
   
   port(
-    clk: in std_logic;
-    rst: in std_logic;
+    sign_a: in std_logic;
+    sign_b: in std_logic;
+    significand_a_plus_b_with_carry: in unsigned ((FP_LEN-(FP_EXP+1) + 1) downto 0);
     
-    sign_a_d3: in std_logic;
-    sign_b_d3: in std_logic;
-    
-    exponent_a_d3: in unsigned(FP_EXP-1 downto 0);
-    
-    significand_a_plus_b_with_carry: in unsigned ( (FP_LEN-(FP_EXP+1) + 1) downto 0);
-    
-    flag_r_d3: in std_logic;
-    flag_g_d3: in std_logic;
-    flag_s_d3: in std_logic;
-    
-    flag_swap_d3: in std_logic;
-    
-    sign_a_q3: out std_logic;
-    sign_b_q3: out std_logic;
-    
-    exponent_a_q3: out unsigned(FP_EXP-1 downto 0);
-    
-    flag_r_q3: out std_logic;
-    flag_g_q3: out std_logic;
-    flag_s_q3: out std_logic;
-    
-    flag_swap_q3: out std_logic;
-    
-    significand_s: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+    significand_s: out unsigned((FP_LEN-(FP_EXP+1)) downto 0);
     carry_out: out std_logic;
-    flag_s_twos_comp: out std_logic;
-    index: out unsigned(4 downto 0)
+    flag_s_twos_comp: out std_logic
   );
   
 end fp_adder_block_three;
 
 architecture beh of fp_adder_block_three is
 
-  signal significand_s_aux: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-
 begin
 
-  add: process(clk,rst)
-  variable index_aux: integer :=0;
+  check_significand: 
+  process(sign_a,sign_b,significand_a_plus_b_with_carry)
+    --variable carry_significand: bit := '0';
+    --variable significand_msb: bit := '0';
   begin
-    if(rst='1') then
+    --carry_significand := significand_a_plus_b_with_carry(FP_LEN-(FP_EXP+1)+1);
+    --significand_msb := significand_a_plus_b_with_carry(FP_LEN-(FP_EXP+1));
+
+    -- If sign_a and sign_b are diferent
+    if (sign_a /= sign_b) then
       
-      sign_a_q3 <= '0';
-      sign_b_q3 <= '0';
-      
-      exponent_a_q3 <= ( others=>'0' );
-    
-      flag_r_q3 <= '0';
-      flag_g_q3 <= '0';
-      flag_s_q3 <= '0';
-      
-      flag_swap_q3 <= '0';
-      
-      significand_s <= ( others=>'0' );
-      
-      carry_out <= '0';
-      index <= (others=>'0');
-      
-    elsif(rising_edge(clk)) then
-    
-      flag_r_q3 <= flag_r_d3;
-      flag_g_q3 <= flag_g_d3;
-      flag_s_q3 <= flag_s_d3;
-      
-      flag_swap_q3 <= flag_swap_d3;
-      
-      sign_a_q3 <= sign_a_d3;
-      sign_b_q3 <= sign_b_d3;
-      
-      exponent_a_q3 <= exponent_a_d3;
-    
-      if (sign_a_d3 /= sign_b_d3) then
-        
-        -- No hubo carry out y MSB de S es 1 (resultado negativo)
-        if (significand_a_plus_b_with_carry( FP_LEN-(FP_EXP+1)+1 ) = '0') and (significand_a_plus_b_with_carry( FP_LEN-(FP_EXP+1) ) = '1') then 
-          significand_s <=  unsigned( not std_logic_vector(significand_a_plus_b_with_carry( (FP_LEN-(FP_EXP+1)) downto 0)))  + to_unsigned(1,(FP_LEN-FP_EXP)) ;
-          significand_s_aux <=  unsigned( not std_logic_vector(significand_a_plus_b_with_carry( (FP_LEN-(FP_EXP+1)) downto 0)))  + to_unsigned(1,(FP_LEN-FP_EXP)) ;
-          flag_s_twos_comp <= '1';
-          carry_out <= '0';
-        else
-          significand_s <= significand_a_plus_b_with_carry( (FP_LEN-(FP_EXP+1)) downto 0);
-          significand_s_aux <= significand_a_plus_b_with_carry( (FP_LEN-(FP_EXP+1)) downto 0);
-          flag_s_twos_comp <= '0';
-          carry_out <= '1';
-        end if;
-        
-        if (significand_s_aux( FP_LEN-(FP_EXP+1) downto 0) /= (significand_s_aux( FP_LEN-(FP_EXP+1) downto 0 )'range => '0')) then
-          while (significand_s_aux( (FP_LEN-(FP_EXP+1)) - index_aux)= '0') loop
-            index_aux := index_aux + 1;
-          end loop;       
-        else
-          index_aux:= FP_LEN-FP_EXP;
-        end if;
-        
-        index <= to_unsigned(index_aux,5);
-        
+      -- without carry and significand_MSB=1 then the result is negative
+      -- apply Complement2 to significand
+      if (significand_a_plus_b_with_carry(FP_LEN-(FP_EXP+1)+1) = '0') and (significand_a_plus_b_with_carry(FP_LEN-(FP_EXP+1)) = '1') then 
+        significand_s <= unsigned(not std_logic_vector(significand_a_plus_b_with_carry((FP_LEN-(FP_EXP+1)) downto 0))) + to_unsigned(1,(FP_LEN-FP_EXP));
+        flag_s_twos_comp <= '1';
+        carry_out <= '0';
       else
-      
-        significand_s <= significand_a_plus_b_with_carry( (FP_LEN-(FP_EXP+1)) downto 0);
+        significand_s <= significand_a_plus_b_with_carry((FP_LEN-(FP_EXP+1)) downto 0);
         flag_s_twos_comp <= '0';
-        
-        -- signos de operandos iguales, pregunto si hay carry out
-        if ( significand_a_plus_b_with_carry( FP_LEN-(FP_EXP+1)+1 ) = '1') then
-          carry_out <= '1';
-        else
-          carry_out <= '0';
+        carry_out <= '1';
+      end if;
             
-          while (significand_a_plus_b_with_carry( (FP_LEN-(FP_EXP+1)) - index_aux)= '0') loop
-            index_aux := index_aux + 1;
-          end loop;
-          
-          index <= to_unsigned(index_aux,5);
-          
-        end if;
+    else
+      -- If sign_a and sign_b are the same
+      -- no complent2
+      significand_s <= significand_a_plus_b_with_carry((FP_LEN-(FP_EXP+1)) downto 0);
+      flag_s_twos_comp <= '0';
+      --carry_out <= std_logic(carry_significand);
+      if (significand_a_plus_b_with_carry(FP_LEN-(FP_EXP+1)+1) = '1') then
+        carry_out <= '1';
+      else
+        carry_out <= '0';
       end if;
     end if;
   end process;
