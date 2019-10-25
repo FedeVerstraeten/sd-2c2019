@@ -1,7 +1,10 @@
 library ieee;
+library work;
+
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use std.textio.all;
+use work.utils_pkg;
 
 entity fp_adder_tb is
 end entity fp_adder_tb;
@@ -9,11 +12,16 @@ end entity fp_adder_tb;
 architecture fp_adder_tb_arch of fp_adder_tb is
   
   constant TCK: time:= 20 ns;     -- periodo de reloj
-  constant DELAY: natural:= 5;    -- retardo de procesamiento del DUT
+  constant DELAY: natural:= 4;    -- retardo de procesamiento del DUT
   constant EXP_SIZE_T: natural:= 7;   -- tamaño exponente
   constant WORD_SIZE_T: natural:= 25; -- tamaño de datos
   constant TEST_PATH: string :="/home/fverstra/Repository/sd-2c2019/tp1/test_files_2015/suma/";
   constant TEST_FILE: string := TEST_PATH & "dummy_test_sum_float_25_7.txt";
+
+  -- File input
+  --file f: text;
+  file datos: text open read_mode is TEST_FILE;
+  --file f: text open read_mode is TEST_FILE;
 
   signal clk: std_logic:= '0';
   signal a_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
@@ -28,8 +36,10 @@ architecture fp_adder_tb_arch of fp_adder_tb is
   -- La senal z_del_aux se define por un problema de conversión
   signal z_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
   
-  -- File input
-  file datos: text open read_mode is TEST_FILE;
+  -- Prueba con valores harcodeados
+  signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+
 
   -- Component to test  
   component fp_adder is
@@ -64,33 +74,39 @@ begin
   -- Generacion del clock del sistema
   clk <= not(clk) after TCK/ 2; -- reloj
 
+  -- Read from test files
   Test_Sequence: process
+    variable u: unsigned(WORD_SIZE_T-1 downto 0);
     variable l: line;
-    variable ch: character:= ' ';
-    variable aux: integer;
-  begin
-    --while not(endfile(input)) loop
-    while not(endfile(datos)) loop
-      report "Entrada x ciclo n°: " & integer'image(ciclos);
-      wait until rising_edge(clk);
-      ciclos <= ciclos + 1;
-      readline(datos, l);
-      read(l, aux);
-      a_file <= to_unsigned(aux, WORD_SIZE_T);
-      read(l, ch);
-      read(l, aux);
-      b_file <= to_unsigned(aux, WORD_SIZE_T);
-      read(l, ch);
-      read(l, aux);
-      z_file <= to_unsigned(aux, WORD_SIZE_T);
-    end loop;
-    
-    file_close(datos);    -- se cierra del archivo
-    wait for TCK*(DELAY+1);
-    assert false report   -- se aborta la simulacion (fin del archivo)
-      "Fin de la simulacion" severity failure;
+    begin
+      while not endfile(datos) loop
+        readline(datos, l);
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        a_file <= unsigned(u);
+
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        b_file <= unsigned(u);
+        
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        z_file <= unsigned(u); 
+        wait for TCK;
+      end loop;
+      
+      -- The WAIT after file_clore statement prevents 
+      -- blocking the program when reading from a file
+      file_close(datos);
+      wait;
+
+      -- abort simulation end of file
+      wait for TCK*(DELAY+1);
+      assert false report
+        "Fin de la simulacion" severity failure;
   end process Test_Sequence;
   
+  -- test_sum_float_25_7.txt
+  --a_tb <= std_logic_vector(to_unsigned(8153147,25));
+  --b_tb <= std_logic_vector(to_unsigned(24788495,25));
+ 
   -- Instanciacion del DUT
   DUT: fp_adder
       generic map(
@@ -102,6 +118,8 @@ begin
         rst => '0',
         a_in => std_logic_vector(a_file),
         b_in => std_logic_vector(b_file),
+        --a_in => a_tb,
+        --b_in => b_tb,
         unsigned(s_out) => z_dut
       );
   
@@ -115,8 +133,10 @@ begin
   -- Verificacion de la condicion
   verificacion: process(clk)
   begin
-    if rising_edge(clk) then
---      report integer'image(to_integer(a_file)) & " " & integer'image(to_integer(b_file)) & " " & integer'image(to_integer(z_file));
+    if falling_edge(clk) then
+      report integer'image(to_integer(unsigned(a_file))) & " + " 
+        & integer'image(to_integer(unsigned(b_file))) & " = " 
+        & integer'image(to_integer(z_dut));
       assert to_integer(z_del) = to_integer(z_dut) report
         "Error: Salida del DUT no coincide con referencia (salida del dut = " & 
         integer'image(to_integer(z_dut)) &
@@ -126,9 +146,9 @@ begin
     else report
       "Simulacion ok";
       
-      if to_integer(z_del) /= to_integer(z_dut) then
-        errores <= errores + 1;
-      end if;
+    --  if to_integer(z_del) /= to_integer(z_dut) then
+    --    errores <= errores + 1;
+    --  end if;
     end if;
     
   end process;

@@ -24,10 +24,10 @@
 --
 ----------------------------------------------------------------------------------
 
-library IEEE;
+library ieee;
 
-use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 use std.textio.all;
 
 library work;
@@ -43,13 +43,12 @@ architecture fp_multiplier_tb_arch of fp_multiplier_tb is
   constant WORD_SIZE_T: natural:= 25; -- tamaño de datos
   constant EXP_SIZE_T: natural:= 7;   -- tamaño exponente
   constant TEST_PATH: string :="/home/fverstra/Repository/sd-2c2019/tp1/test_files_2015/multiplicacion/";
-  constant TEST_FILE: string := TEST_PATH & "test_mul_float_25_7.txt";
+  constant TEST_FILE: string := TEST_PATH & "dummy_test_mul_float_25_7.txt";
 
   signal clk: std_logic:= '0';
   signal a_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal b_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal z_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
-  signal z_del: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal z_dut: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
 
   -- Prueba con valores harcodeados
@@ -81,19 +80,6 @@ architecture fp_multiplier_tb_arch of fp_multiplier_tb is
     );
   end component fp_multiplier;
   
-  -- Declaracion de la linea de retardo
-  component delay_gen is
-    generic(
-      N: natural:= 26;
-      DELAY: natural:= 0
-    );
-    port(
-      clk: in std_logic;
-      a_in: in std_logic_vector(N-1 downto 0);
-      b_in: out std_logic_vector(N-1 downto 0)
-    );
-  end component;
-  
 begin
   -- Generacion del clock del sistema
   clk <= not(clk) after TCK/2; -- reloj
@@ -104,26 +90,30 @@ begin
     variable l: line;
     begin
     file_open(f, TEST_FILE, read_mode);
-          while not endfile(f) loop
-              readline(f, l);
-              utils_pkg.read_unsigned_decimal_from_line(l, u);
-              a_file <= unsigned(u);
+    while not endfile(f) loop
+        readline(f, l);
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        a_file <= unsigned(u);
 
-              utils_pkg.read_unsigned_decimal_from_line(l, u);
-              b_file <= unsigned(u);
-              
-              utils_pkg.read_unsigned_decimal_from_line(l, u);
-              z_file <= unsigned(u); 
-        wait for TCK;
-            assert (z_file = z_dut)
-              report "Calculation performed " & 
-                    integer'image(to_integer(a_file)) & " * " &
-                    integer'image(to_integer(b_file)) & " = " &
-                     integer'image(to_integer(z_dut)) & " and the expected result was " &
-                    integer'image(to_integer(z_file))
-            severity failure;
-          end loop;
-      file_close(f);
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        b_file <= unsigned(u);
+        
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        z_file <= unsigned(u); 
+    wait for TCK;
+      assert (z_file = z_dut)
+        report "Calculation performed " & 
+              integer'image(to_integer(a_file)) & " * " &
+              integer'image(to_integer(b_file)) & " = " &
+               integer'image(to_integer(z_dut)) & " and the expected result was " &
+              integer'image(to_integer(z_file))
+      severity failure;
+    end loop;
+    file_close(f);
+    
+    -- This statement prevents blocking the 
+    -- program when reading from a file
+    wait;
   end process Test_Sequence;
 
 -- 1103626240 -> 0x41c80000 -> 40
