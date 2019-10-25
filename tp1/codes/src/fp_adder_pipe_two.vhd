@@ -48,7 +48,7 @@ begin
       flag_r_q2 <= '0';
       flag_g_q2 <= '0';
       flag_s_q2 <= '0';
-    elsif(rising_edge(clk)) then
+    elsif(falling_edge(clk)) then
       sign_a_q2 <= sign_a_d2;
       sign_b_q2 <= sign_b_d2; 
       exponent_a_q2 <= exponent_a_d2;

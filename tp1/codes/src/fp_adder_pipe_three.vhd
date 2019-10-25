@@ -52,7 +52,7 @@ begin
       significand_s_q3 <= (others => '0');
       carry_out_q3 <= '0';
       flag_s_twos_comp_q3 <= '0';
-    elsif(rising_edge(clk)) then
+    elsif(falling_edge(clk)) then
       sign_a_q3 <= sign_a_d3;
       sign_b_q3 <= sign_b_d3; 
       exponent_a_q3 <= exponent_a_d3;

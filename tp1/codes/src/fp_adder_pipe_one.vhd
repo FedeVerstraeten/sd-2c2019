@@ -45,7 +45,7 @@ begin
       significand_a_q1 <= (others=>'0');
       significand_b_q1 <= (others=>'0');
       flag_swap_q1 <= '0';
-    elsif(rising_edge(clk)) then
+    elsif(falling_edge(clk)) then
       sign_a_q1 <= sign_a_d1;
       sign_b_q1 <= sign_b_d1; 
       exponent_a_q1 <= exponent_a_d1;
