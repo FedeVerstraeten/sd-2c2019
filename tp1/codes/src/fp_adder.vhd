@@ -175,31 +175,75 @@ architecture beh of fp_adder is
       FP_LEN: integer:= WORD_SIZE_T
     );
   
-    port(clk: in std_logic;
+    port(
+      -- Port in
+      sign_a: in std_logic;
+      sign_b: in std_logic;
+      significand_a_plus_b_with_carry: in unsigned ( (FP_LEN-(FP_EXP+1) + 1) downto 0);
+
+      -- Port out
+      significand_s: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+      carry_out: out std_logic;
+      flag_s_twos_comp: out std_logic
+    );
+  end component;
+  
+  component fp_adder_pipe_three
+    generic(
+      FP_EXP: integer:= EXP_SIZE_T;
+      FP_LEN: integer:= WORD_SIZE_T
+    );
+    port(
+      clk: in std_logic;
       rst: in std_logic;
     
       -- Port in
       sign_a_d3: in std_logic;
       sign_b_d3: in std_logic;
       exponent_a_d3: in unsigned(FP_EXP-1 downto 0);
-      significand_a_plus_b_with_carry: in unsigned ( (FP_LEN-(FP_EXP+1) + 1) downto 0);
       flag_r_d3: in std_logic;
       flag_g_d3: in std_logic;
       flag_s_d3: in std_logic;
+      significand_s_d3: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
       flag_swap_d3: in std_logic;
+      carry_out_d3: in std_logic;
+      flag_s_twos_comp_d3: in std_logic;
 
       -- Port out
       sign_a_q3: out std_logic;
-      sign_b_q3: out std_logic;   
+      sign_b_q3: out std_logic;
       exponent_a_q3: out unsigned(FP_EXP-1 downto 0);
       flag_r_q3: out std_logic;
       flag_g_q3: out std_logic;
       flag_s_q3: out std_logic;
+      significand_s_q3: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
       flag_swap_q3: out std_logic;
-      significand_s: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-      carry_out: out std_logic;
-      flag_s_twos_comp: out std_logic;
-      index: out unsigned(4 downto 0)
+      carry_out_q3: out std_logic;
+      flag_s_twos_comp_q3: out std_logic    
+    );
+  end component;
+  
+  component fp_adder_block_four
+    generic(
+      FP_EXP: integer:= EXP_SIZE_T;
+      FP_LEN: integer:= WORD_SIZE_T
+    );
+    port(
+      -- Port in
+      sign_a: in std_logic;
+      sign_b: in std_logic;
+      exponent_a: in unsigned(FP_EXP-1 downto 0);
+      significand_s: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+      carry_out: in std_logic;
+      flag_r: in std_logic;
+      flag_g: in std_logic;
+      flag_s: in std_logic;
+
+      -- Port out
+      significand_s_normalized: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+      exponent_a_plus_b: out unsigned(FP_EXP-1 downto 0);
+      flag_r_add: out std_logic;
+      flag_s_add: out std_logic
     );
   end component;
   
@@ -215,84 +259,22 @@ architecture beh of fp_adder is
       -- Port in
       sign_a_d4: in std_logic;
       sign_b_d4: in std_logic;
-      exponent_a_d4: in unsigned(FP_EXP-1 downto 0);
-      flag_r_d4: in std_logic;
-      flag_g_d4: in std_logic;
-      flag_s_d4: in std_logic;
-      significand_s_d4: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
       flag_swap_d4: in std_logic;
-      carry_out_d4: in std_logic;
       flag_s_twos_comp_d4: in std_logic;
-      index_d4: in unsigned(4 downto 0);
-
+      significand_s_normalized_d4: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+      exponent_a_plus_b_d4: in unsigned(FP_EXP-1 downto 0);
+      flag_r_add_d4: in std_logic;
+      flag_s_add_d4: in std_logic;
+    
       -- Port out
       sign_a_q4: out std_logic;
       sign_b_q4: out std_logic;
-      exponent_a_q4: out unsigned(FP_EXP-1 downto 0);
-      flag_r_q4: out std_logic;
-      flag_g_q4: out std_logic;
-      flag_s_q4: out std_logic;
-      significand_s_q4: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
       flag_swap_q4: out std_logic;
-      carry_out_q4: out std_logic;
       flag_s_twos_comp_q4: out std_logic;
-      index_q4: out unsigned(4 downto 0)
-    );
-  end component;
-  
-  component fp_adder_block_four
-    generic(
-      FP_EXP: integer:= EXP_SIZE_T;
-      FP_LEN: integer:= WORD_SIZE_T
-    );
-    port(
-      -- Port in
-      sign_a: in std_logic;
-      sign_b: in std_logic;
-      exponent_a: in unsigned(FP_EXP-1 downto 0);
-      significand_s: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-      index: in unsigned(4 downto 0);
-      carry_out: in std_logic;
-      flag_r: in std_logic;
-      flag_g: in std_logic;
-      flag_s: in std_logic;
-
-      -- Port out
-      significand_s_normalized: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-      exponent_a_plus_b: out unsigned(FP_EXP-1 downto 0);
-      flag_r_add: out std_logic;
-      flag_s_add: out std_logic
-    );
-  end component;
-  
-  component fp_adder_pipe_five
-    generic(
-      FP_EXP: integer:= EXP_SIZE_T;
-      FP_LEN: integer:= WORD_SIZE_T
-    );
-    port(
-      clk: in std_logic;
-      rst: in std_logic;
-    
-      -- Port in
-      sign_a_d5: in std_logic;
-      sign_b_d5: in std_logic;
-      flag_swap_d5: in std_logic;
-      flag_s_twos_comp_d5: in std_logic;
-      flag_r_add_d5: in std_logic;
-      flag_s_add_d5: in std_logic;
-      significand_s_normalized_d5: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-      exponent_a_plus_b_d5: in unsigned(FP_EXP-1 downto 0);
-    
-      -- Port out
-      sign_a_q5: out std_logic;
-      sign_b_q5: out std_logic;
-      flag_swap_q5: out std_logic;
-      flag_s_twos_comp_q5: out std_logic;
-      flag_r_add_q5: out std_logic;
-      flag_s_add_q5: out std_logic;
-      significand_s_normalized_q5: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-      exponent_a_plus_b_q5: out unsigned(FP_EXP-1 downto 0)
+      significand_s_normalized_q4: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+      exponent_a_plus_b_q4: out unsigned(FP_EXP-1 downto 0);
+      flag_r_add_q4: out std_logic;
+      flag_s_add_q4: out std_logic
     );
   
   end component;
@@ -354,30 +336,21 @@ architecture beh of fp_adder is
   signal flag_swap_q2: std_logic;
   
   -- Block three output
+  signal significand_s: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+  signal carry_out: std_logic;
+  signal flag_s_twos_comp: std_logic;
+
+  -- Pipe three output
   signal sign_a_q3: std_logic;
   signal sign_b_q3: std_logic;
   signal exponent_a_q3: unsigned(FP_EXP-1 downto 0);
   signal flag_r_q3: std_logic;
   signal flag_g_q3: std_logic;
   signal flag_s_q3: std_logic;
+  signal significand_s_q3: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
   signal flag_swap_q3: std_logic;
-  signal significand_s: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-  signal carry_out: std_logic;
-  signal flag_s_twos_comp: std_logic;
-  signal index: unsigned(4 downto 0);
-
-  -- Pipe four output
-  signal sign_a_q4: std_logic;
-  signal sign_b_q4: std_logic;
-  signal exponent_a_q4: unsigned(FP_EXP-1 downto 0);
-  signal flag_r_q4: std_logic;
-  signal flag_g_q4: std_logic;
-  signal flag_s_q4: std_logic;
-  signal significand_s_q4: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-  signal flag_swap_q4: std_logic;
-  signal carry_out_q4: std_logic;
-  signal flag_s_twos_comp_q4: std_logic;
-  signal index_q4: unsigned(4 downto 0);
+  signal carry_out_q3: std_logic;
+  signal flag_s_twos_comp_q3: std_logic;
   
   -- Block four output
   signal significand_s_normalized: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
@@ -385,15 +358,15 @@ architecture beh of fp_adder is
   signal flag_r_add: std_logic;
   signal flag_s_add: std_logic;
   
-  -- Pipe five output
-  signal sign_a_q5: std_logic;
-  signal sign_b_q5: std_logic;
-  signal flag_swap_q5: std_logic;
-  signal flag_s_twos_comp_q5: std_logic;
-  signal flag_r_add_q5: std_logic;
-  signal flag_s_add_q5: std_logic;
-  signal significand_s_normalized_q5: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
-  signal exponent_a_plus_b_q5: unsigned(FP_EXP-1 downto 0);
+  -- Pipe four output
+  signal sign_a_q4: std_logic;
+  signal sign_b_q4: std_logic;
+  signal flag_swap_q4: std_logic;
+  signal flag_s_twos_comp_q4: std_logic;
+  signal flag_r_add_q4: std_logic;
+  signal flag_s_add_q4: std_logic;
+  signal significand_s_normalized_q4: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+  signal exponent_a_plus_b_q4: unsigned(FP_EXP-1 downto 0);
     
 begin
 
@@ -487,77 +460,62 @@ begin
   fp_adder_block_3: fp_adder_block_three
   port map(
     -- IN
-    clk => clk,
-    rst => rst,
     -- signals from pipe_two
-    sign_a_d3 => sign_a_q2,
-    sign_b_d3 => sign_a_q2,
-    exponent_a_d3 => exponent_a_q2,
+    sign_a => sign_a_q2,
+    sign_b => sign_b_q2,
     significand_a_plus_b_with_carry => significand_a_plus_b_with_carry_q2,
-    flag_r_d3 => flag_r_q2,
-    flag_g_d3 => flag_g_q2,
-    flag_s_d3 => flag_s_q2,
-    flag_swap_d3 => flag_swap_q2,
   
     -- OUT
-    sign_a_q3 => sign_a_q3,
-    sign_b_q3 => sign_b_q3,
-    exponent_a_q3 => exponent_a_q3,     
-    flag_r_q3 => flag_r_q3,
-    flag_g_q3 => flag_g_q3,
-    flag_s_q3 => flag_s_q3,
-    flag_swap_q3 => flag_swap_q3,
     significand_s => significand_s,
     carry_out => carry_out,
-    flag_s_twos_comp => flag_s_twos_comp,
-    index => index
+    flag_s_twos_comp => flag_s_twos_comp
   );
     
-  fp_adder_pipe_4: fp_adder_pipe_four
+  fp_adder_pipe_3: fp_adder_pipe_three
   port map(
     -- IN
     clk => clk,
     rst => rst,
+
+    -- signals from pipe_two
+    sign_a_d3 => sign_a_q2,
+    sign_b_d3 => sign_b_q2,
+    exponent_a_d3 => exponent_a_q2,
+    flag_r_d3 => flag_r_q2,
+    flag_g_d3 => flag_g_q2,
+    flag_s_d3 => flag_s_q2,
+    flag_swap_d3 => flag_swap_q2,
+
     -- signals from block_three
-    sign_a_d4 => sign_a_q3,
-    sign_b_d4 => sign_b_q3,
-    exponent_a_d4 => exponent_a_q3,
-    flag_r_d4 => flag_r_q3,
-    flag_g_d4 => flag_g_q3,
-    flag_s_d4 => flag_s_q3,
-    significand_s_d4 => significand_s,
-    flag_swap_d4 => flag_swap_q3,
-    carry_out_d4 => carry_out,
-    flag_s_twos_comp_d4 => flag_s_twos_comp,
-    index_d4 => index,
+    significand_s_d3 => significand_s,
+    carry_out_d3 => carry_out,
+    flag_s_twos_comp_d3 => flag_s_twos_comp,
   
     -- OUT
-    sign_a_q4 => sign_a_q4,
-    sign_b_q4 => sign_b_q4,
-    exponent_a_q4 => exponent_a_q4,
-    flag_r_q4 => flag_r_q4,
-    flag_g_q4 => flag_g_q4,
-    flag_s_q4 => flag_s_q4,
-    significand_s_q4 => significand_s_q4,
-    flag_swap_q4 => flag_swap_q4,
-    carry_out_q4 => carry_out_q4,
-    flag_s_twos_comp_q4 => flag_s_twos_comp_q4,
-    index_q4 => index_q4
+    sign_a_q3 => sign_a_q3,
+    sign_b_q3 => sign_b_q3,
+    exponent_a_q3 => exponent_a_q3,
+    flag_r_q3 => flag_r_q3,
+    flag_g_q3 => flag_g_q3,
+    flag_s_q3 => flag_s_q3,
+    flag_swap_q3 => flag_swap_q3,
+    significand_s_q3 => significand_s_q3,
+    carry_out_q3 => carry_out_q3,
+    flag_s_twos_comp_q3 => flag_s_twos_comp_q3
   );
   
   fp_adder_block_4 : fp_adder_block_four
   port map(
     -- IN
     -- signals from block_four
-    sign_a => sign_a_q4,
-    sign_b => sign_b_q4,
-    exponent_a => exponent_a_q4,
-    significand_s => significand_s_q4,
-    index => index_q4,
-    carry_out => carry_out_q4,
-    flag_r => flag_r_q4,
-    flag_g => flag_g_q4,
-    flag_s => flag_s_q4,
+    sign_a => sign_a_q3,
+    sign_b => sign_b_q3,
+    exponent_a => exponent_a_q3,
+    significand_s => significand_s_q3,
+    carry_out => carry_out_q3,
+    flag_r => flag_r_q3,
+    flag_g => flag_g_q3,
+    flag_s => flag_s_q3,
   
     -- OUT
     significand_s_normalized => significand_s_normalized,
@@ -566,46 +524,46 @@ begin
     flag_s_add => flag_s_add
   );
   
-  fp_adder_pipe_5 : fp_adder_pipe_five 
+  fp_adder_pipe_4 : fp_adder_pipe_four 
   port map(
     -- IN
     clk => clk,
     rst => rst,
-    -- signals from pipe_four
-    sign_a_d5 => sign_a_q4,
-    sign_b_d5 => sign_b_q4,
-    flag_swap_d5 => flag_swap_q4,
-    flag_s_twos_comp_d5 => flag_s_twos_comp_q4,
+    -- signals from pipe_three
+    sign_a_d4 => sign_a_q3,
+    sign_b_d4 => sign_b_q3,
+    flag_swap_d4 => flag_swap_q3,
+    flag_s_twos_comp_d4 => flag_s_twos_comp_q3,
 
     -- signals from block_four
-    significand_s_normalized_d5 => significand_s_normalized,
-    exponent_a_plus_b_d5 => exponent_a_plus_b,
-    flag_r_add_d5 => flag_r_add,
-    flag_s_add_d5 => flag_s_add,
+    significand_s_normalized_d4 => significand_s_normalized,
+    exponent_a_plus_b_d4 => exponent_a_plus_b,
+    flag_r_add_d4 => flag_r_add,
+    flag_s_add_d4 => flag_s_add,
     
     -- OUT
-    sign_a_q5 => sign_a_q5,
-    sign_b_q5 => sign_b_q5,
-    flag_swap_q5 => flag_swap_q5,
-    flag_s_twos_comp_q5 => flag_s_twos_comp_q5,
-    flag_r_add_q5 => flag_r_add_q5,
-    flag_s_add_q5 => flag_s_add_q5,
-    significand_s_normalized_q5 => significand_s_normalized_q5,
-    exponent_a_plus_b_q5 => exponent_a_plus_b_q5
+    sign_a_q4 => sign_a_q4,
+    sign_b_q4 => sign_b_q4,
+    flag_swap_q4 => flag_swap_q4,
+    flag_s_twos_comp_q4 => flag_s_twos_comp_q4,
+    significand_s_normalized_q4 => significand_s_normalized_q4,
+    exponent_a_plus_b_q4 => exponent_a_plus_b_q4,
+    flag_r_add_q4 => flag_r_add_q4,
+    flag_s_add_q4 => flag_s_add_q4
   );
   
   fp_adder_block_5 : fp_adder_block_five
   port map(
     -- IN
-    -- signals from pipe_five
-    sign_a => sign_a_q5,
-    sign_b => sign_b_q5,
-    flag_swap => flag_swap_q5,
-    flag_s_twos_comp => flag_s_twos_comp_q5,
-    flag_r_add => flag_r_add_q5,
-    flag_s_add => flag_s_add_q5,
-    significand_s_normalized => significand_s_normalized_q5,
-    exponent_a_plus_b => exponent_a_plus_b_q5,
+    -- signals from pipe_four
+    sign_a => sign_a_q4,
+    sign_b => sign_b_q4,
+    flag_swap => flag_swap_q4,
+    flag_s_twos_comp => flag_s_twos_comp_q4,
+    significand_s_normalized => significand_s_normalized_q4,
+    exponent_a_plus_b => exponent_a_plus_b_q4,
+    flag_r_add => flag_r_add_q4,
+    flag_s_add => flag_s_add_q4,
 
     -- OUT  
     s_out => s_out
