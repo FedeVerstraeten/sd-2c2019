@@ -37,9 +37,9 @@
 --
 ----------------------------------------------------------------------------------
 
-library IEEE;
-use IEEE.std_logic_1164.all; -- definicion de tipos
-use IEEE.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity fp_multiplier is
   
@@ -95,7 +95,7 @@ begin
         significand_a_times_b :=  significand_a_times_b_2F_plus_2_length( (2*(FP_LEN-FP_EXP))-2 downto (FP_LEN-FP_EXP));
       else
         exp_increase := 0 ;
-        significand_a_times_b :=  significand_a_times_b_2F_plus_2_length( (2*(FP_LEN-FP_EXP)) - 2 downto (FP_LEN-FP_EXP));
+        significand_a_times_b :=  significand_a_times_b_2F_plus_2_length( (2*(FP_LEN-FP_EXP))-3 downto (FP_LEN-FP_EXP)-1);
       end if;
       
       -- Exponent calculation
@@ -103,7 +103,15 @@ begin
       exp_b :=  ( unsigned(b_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(exp_bias,FP_EXP) );
       exp_res := (exp_a + exp_b + to_unsigned(exp_bias,FP_EXP) + to_unsigned(exp_increase,FP_EXP));  
       
-      -- Load exponent and mantissa
+      -- to Infinite validation
+      --if exp_aux(FP_EXP) = '1' then
+      --  exp_res := to_unsigned(2**FP_EXP-1,FP_EXP);
+      --  significand_a_times_b := to_unsigned(0,FP_LEN-(FP_EXP+1));
+      --else
+      --  exp_res(FP_LEN-1 downto 0) := exp_aux(FP_LEN-1 downto 0);
+      --end if ;
+      
+      ---- Load exponent and mantissa
       s_out(FP_LEN-2 downto 0) <=  std_logic_vector(exp_res) & std_logic_vector(significand_a_times_b);  
   end process;
 
