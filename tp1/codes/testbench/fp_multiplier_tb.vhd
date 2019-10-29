@@ -52,8 +52,8 @@ architecture fp_multiplier_tb_arch of fp_multiplier_tb is
   signal z_dut: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
 
   -- Prueba con valores harcodeados
-  signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
-  signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  --signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  --signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
   -----
    
   --file datos: text open read_mode
@@ -77,43 +77,41 @@ begin
   clk <= not(clk) after TCK/2;
 
   -- Read from test files
-  --Test_Sequence: process
-  --  variable u: unsigned(WORD_SIZE_T-1 downto 0);
-  --  variable l: line;
-  --  begin
-  --  file_open(data_file, TEST_FILE, read_mode);
-  --  while not endfile(data_file) loop
-  --      readline(data_file, l);
-  --      utils_pkg.read_unsigned_decimal_from_line(l, u);
-  --      a_file <= unsigned(u);
+  Test_Sequence: process
+    variable u: unsigned(WORD_SIZE_T-1 downto 0);
+    variable l: line;
+    begin
+    file_open(data_file, TEST_FILE, read_mode);
+    while not endfile(data_file) loop
+        readline(data_file, l);
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        a_file <= unsigned(u);
 
-  --      utils_pkg.read_unsigned_decimal_from_line(l, u);
-  --      b_file <= unsigned(u);
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        b_file <= unsigned(u);
         
-  --      utils_pkg.read_unsigned_decimal_from_line(l, u);
-  --      z_file <= unsigned(u); 
-  --  wait for TCK;
-  --    assert (z_file = z_dut)
-  --      report "Calculation performed " & 
-  --            integer'image(to_integer(a_file)) & " * " &
-  --            integer'image(to_integer(b_file)) & " = " &
-  --             integer'image(to_integer(z_dut)) & " and the expected result was " &
-  --            integer'image(to_integer(z_file))
-  --    severity warning;
-  --  end loop;
-  --  file_close(data_file);
+        utils_pkg.read_unsigned_decimal_from_line(l, u);
+        z_file <= unsigned(u); 
+    wait for TCK;
+      assert (z_file = z_dut)
+        report "Calculation performed " & 
+              integer'image(to_integer(a_file)) & " * " &
+              integer'image(to_integer(b_file)) & " = " &
+               integer'image(to_integer(z_dut)) & " and the expected result was " &
+              integer'image(to_integer(z_file))
+      severity warning;
+    end loop;
+    file_close(data_file);
     
-  --  -- This statement prevents blocking the 
-  --  -- program when reading from a file
-  --  wait;
-  --end process Test_Sequence;
+    -- This statement prevents blocking the 
+    -- program when reading from a file
+    wait;
+  end process Test_Sequence;
 
   -- Instanciacion del DUT
   -- fp_exp=7 and fp_length=25
   --a_tb <= std_logic_vector(to_unsigned(33419898,25));
   --b_tb <= std_logic_vector(to_unsigned(7995526,25));
-  a_tb <= std_logic_vector(to_unsigned(16733525,25));
-  b_tb <= std_logic_vector(to_unsigned(16766293,25));
   
 
   DUT: fp_multiplier
@@ -122,10 +120,10 @@ begin
         FP_LEN => WORD_SIZE_T
       )
       port map(
-        a_in => a_tb, 
-        b_in => b_tb,
-        --a_in => std_logic_vector(a_file),
-        --b_in => std_logic_vector(b_file),
+        --a_in => a_tb, 
+        --b_in => b_tb,
+        a_in => std_logic_vector(a_file),
+        b_in => std_logic_vector(b_file),
         unsigned(s_out) => z_dut
       );
 
