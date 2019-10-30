@@ -28,61 +28,64 @@ entity fp_adder_block_four is
 end fp_adder_block_four;
 
 architecture beh of fp_adder_block_four is
-  signal index: unsigned(4 downto 0):= (others => '0');
+  -- Max size 2^5=32 of right shift 
+  signal index_shift: unsigned(4 downto 0):= (others => '0');
 begin
-  
-  index_def:process(sign_a,sign_b,significand_s,carry_out)
+
+  right_shift_index:process(sign_a,sign_b,significand_s,carry_out)
     variable index_aux: integer :=0;
   begin
+    if (sign_a /= sign_b) or carry_out='0' then
+      while (significand_s((FP_LEN-(FP_EXP+1)) - index_aux)= '0') loop
+        index_aux := index_aux + 1;
+      end loop;
+      index_shift <= to_unsigned(index_aux,5);    
+    end if;
+  end process right_shift_index;
 
-    if (sign_a /= sign_b) then
-
-      if (significand_s( FP_LEN-(FP_EXP+1) downto 0) /= (significand_s( FP_LEN-(FP_EXP+1) downto 0 )'range => '0')) then
-        while (significand_s((FP_LEN-(FP_EXP+1)) - index_aux)= '0') loop
-          index_aux := index_aux + 1;
-        end loop;       
-      else
-        index_aux:= FP_LEN-FP_EXP;
-      end if;     
-      index <= to_unsigned(index_aux,5);  
-
-    else
-      if ( carry_out = '0') then        
-        while (significand_s((FP_LEN-(FP_EXP+1)) - index_aux)= '0') loop
-          index_aux := index_aux + 1;
-        end loop;
-        index <= to_unsigned(index_aux,5);    
-      end if;
-    end if ;
-  end process index_def;
-
-  significand_s_normalized <= ( carry_out & significand_s( (FP_LEN-(FP_EXP+1)) downto 1) ) 
-  when ((sign_a xor sign_b)='0' and carry_out='1') 
-    else ( significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index) downto 0) & flag_g ) 
-      when to_integer(index) = 1 
-    else ( significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index) downto 0) & flag_g & ( (significand_s( (to_integer(index) - 2) downto 0)'range) => '0') ) 
-      when to_integer(index) >= 2 
+  -- if sign_a=sign_b and carry_out=1
+  significand_s_normalized <= ( carry_out & significand_s((FP_LEN-(FP_EXP+1)) downto 1) ) 
+  when ((sign_a xor sign_b)='0' and carry_out='1')
+    --significand_s without left shift
+    else significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index_shift) downto 0)
+      when to_integer(index_shift) = 0
+    -- significand_s & flag_g
+    else ( significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index_shift) downto 0) & flag_g ) 
+      when to_integer(index_shift) = 1 
+    -- significand_s & flag_g & 0..0
+    else ( significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index_shift) downto 0) & flag_g & ( (significand_s( (to_integer(index_shift) - 2) downto 0)'range) => '0') ) 
+      when to_integer(index_shift) >= 2
+    -- underflow 
     else ( flag_g & (significand_s( (FP_LEN - (FP_EXP+1) - 1 ) downto 0)'range => '0') ) 
-      when (to_integer(index) = (FP_LEN-(FP_EXP+1)+1) and flag_g = '1') 
+      when (to_integer(index_shift) = (FP_LEN-(FP_EXP+1)+1) and flag_g = '1') 
     else ( others => '0');
 
   -- with carry and sign_a = sing_b
   exponent_a_plus_b <= ( exponent_a + to_unsigned(1,FP_EXP) )
   when ((sign_a xor sign_b)='0' and carry_out='1') 
-    else ( exponent_a - index);     
-                
-  flag_r_add <= significand_s(0) 
-  when ((sign_a xor sign_b)='0' and carry_out='1')  --r:= FP_LENSB de S antes del desplazamiento
-    else flag_g 
-      when to_integer(index) = 0 -- r:=g
-    else '0' 
-      when to_integer(index) >= 2 ;
+    else ( exponent_a - index_shift);
+
+  flag_r_add <= '0';
+  flag_s_add <= '0';
   
-  flag_s_add <= (flag_g or significand_s(0) or flag_s) 
-  when ((sign_a xor sign_b)='0' and carry_out='1') -- s:= or(g,r,s)
-    else (flag_r or flag_s) 
-      when to_integer(index) = 0 --s:= or(r,s)
-    else '0' 
-      when to_integer(index) >= 2 ;
+  ----r:= FP_LSB de significand_s antes del desplazamiento a la derecha
+  --flag_r_add <= significand_s(0) 
+  --when ((sign_a xor sign_b)='0' and carry_out='1')
+  --  -- r:=g
+  --  else flag_g 
+  --    when to_integer(index_shift) = 0 
+  --  -- r:=0 si desplazo dos o mas a izquierda
+  --  else '0' 
+  --    when to_integer(index_shift) >= 2 ;
+  
+  ---- s:= or(g,r,s) si significand_s fue desplazado a derecha
+  --flag_s_add <= (flag_g or significand_s(0) or flag_s) 
+  --when ((sign_a xor sign_b)='0' and carry_out='1') 
+  --  --s:= or(r,s)
+  --  else (flag_r or flag_s) 
+  --    when to_integer(index_shift) = 0 
+  --  -- s:=0 si desplazo dos o mas a izquierda
+  --  else '0' 
+  --    when to_integer(index_shift) >= 2 ;
           
 end beh;
