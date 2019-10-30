@@ -38,8 +38,8 @@ end entity fp_multiplier_tb;
 
 architecture fp_multiplier_tb_arch of fp_multiplier_tb is
   
-  constant TCK: time:= 20 ns;     -- clock period
-  constant DELAY: natural:= 0;    -- DUT delay
+  constant TCK: time:= 20 ns;         -- clock period
+  constant DELAY: natural:= 0;        -- DUT delay
   constant WORD_SIZE_T: natural:= 25; -- size float
   constant EXP_SIZE_T: natural:= 7;   -- size exponent
   constant TEST_PATH: string :="/home/fverstra/Repository/sd-2c2019/tp1/test_files_2015/multiplicacion/";
