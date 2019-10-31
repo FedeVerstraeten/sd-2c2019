@@ -5,8 +5,8 @@
 -- Filename: fp_subtractor.vhd
 ---------------------------------------------------------------------------------- 
 -- Author: Federico Verstraeten
--- Design Name:    Floating Point Adder
--- Module Name:    FP Adder
+-- Design Name:    Floating Point Subtractor
+-- Module Name:    FP Subtractor
 -- @Copyright (C):
 --    This file is part of 'TP1 - Aritmetica de punto flotante'.
 --    Unauthorized copying or use of this file via any medium

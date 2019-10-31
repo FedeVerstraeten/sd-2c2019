@@ -62,14 +62,6 @@ begin
     -- Discard flag_r and flag_s by truncation
     flag_r <= '0';
     flag_s <= '0';
-
-    --if to_integer(exp_shift)>1 then
-    --  flag_r <= significand_b(to_integer(exp_shift)-2);
-    --else
-    --  flag_r <= '0';
-    --end if ;
-    --flag_s <= '0' when (significand_b(to_integer(exp_shift)-3 downto 0) = (significand_b(to_integer(exp_shift)-3 downto 0)'range => '0')) 
-    --  else '1';
   end process;
 
 end beh;

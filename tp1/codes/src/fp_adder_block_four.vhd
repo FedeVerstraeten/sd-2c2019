@@ -67,25 +67,5 @@ begin
 
   flag_r_add <= '0';
   flag_s_add <= '0';
-  
-  ----r:= FP_LSB de significand_s antes del desplazamiento a la derecha
-  --flag_r_add <= significand_s(0) 
-  --when ((sign_a xor sign_b)='0' and carry_out='1')
-  --  -- r:=g
-  --  else flag_g 
-  --    when to_integer(index_shift) = 0 
-  --  -- r:=0 si desplazo dos o mas a izquierda
-  --  else '0' 
-  --    when to_integer(index_shift) >= 2 ;
-  
-  ---- s:= or(g,r,s) si significand_s fue desplazado a derecha
-  --flag_s_add <= (flag_g or significand_s(0) or flag_s) 
-  --when ((sign_a xor sign_b)='0' and carry_out='1') 
-  --  --s:= or(r,s)
-  --  else (flag_r or flag_s) 
-  --    when to_integer(index_shift) = 0 
-  --  -- s:=0 si desplazo dos o mas a izquierda
-  --  else '0' 
-  --    when to_integer(index_shift) >= 2 ;
           
 end beh;

@@ -1,7 +1,7 @@
-----------------------------------------------------------------------------------
--- Title: FIUBA - 66.17 Sistemas Digitales
 -- Project: TP1 - Aritmetica de punto flotante
 ----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+-- Title: FIUBA - 66.17 Sistemas Digitales
 -- Filename: fp_multiplier_tb.vhd
 ---------------------------------------------------------------------------------- 
 -- Author: Federico Verstraeten
@@ -115,16 +115,16 @@ begin
   
 
   DUT: fp_multiplier
-      generic map(
-        FP_EXP => EXP_SIZE_T,
-        FP_LEN => WORD_SIZE_T
-      )
-      port map(
-        --a_in => a_tb, 
-        --b_in => b_tb,
-        a_in => std_logic_vector(a_file),
-        b_in => std_logic_vector(b_file),
-        unsigned(s_out) => z_dut
-      );
+    generic map(
+      FP_EXP => EXP_SIZE_T,
+      FP_LEN => WORD_SIZE_T
+    )
+    port map(
+      a_in => std_logic_vector(a_file),
+      b_in => std_logic_vector(b_file),
+      --a_in => a_tb, 
+      --b_in => b_tb,
+      unsigned(s_out) => z_dut
+    );
 
 end architecture fp_multiplier_tb_arch; 

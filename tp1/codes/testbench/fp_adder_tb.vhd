@@ -1,3 +1,29 @@
+----------------------------------------------------------------------------------
+-- Title: FIUBA - 66.17 Sistemas Digitales
+-- Project: TP1 - Aritmetica de punto flotante
+----------------------------------------------------------------------------------
+-- Filename: fp_adder_tb.vhd
+---------------------------------------------------------------------------------- 
+-- Author: Federico Verstraeten
+-- Design Name:    Floating Point Adder - Test Bench
+-- Module Name:    FP Adder - TB
+-- @Copyright (C):
+--    This file is part of 'TP1 - Aritmetica de punto flotante'.
+--    Unauthorized copying or use of this file via any medium
+--    is strictly prohibited.
+----------------------------------------------------------------------------------
+-- Description: 
+--
+----------------------------------------------------------------------------------
+-- Dependencies:
+-- 
+----------------------------------------------------------------------------------
+-- Revision: 
+-- Revision 1.0
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+
 library ieee;
 library work;
 
@@ -35,8 +61,8 @@ architecture fp_adder_tb_arch of fp_adder_tb is
   signal z_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
   
   -- Prueba con valores harcodeados
-  signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
-  signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  --signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  --signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
 
 
   -- Component to test  
@@ -107,20 +133,20 @@ begin
  
   -- Instanciacion del DUT
   DUT: fp_adder
-      generic map(
-        FP_EXP => EXP_SIZE_T,
-        FP_LEN => WORD_SIZE_T
-      )
-      port map(
-        clk => clk,
-        rst => '0',
-        a_in => std_logic_vector(a_file),
-        b_in => std_logic_vector(b_file),
-        --a_in => a_tb,
-        --b_in => b_tb,
-        unsigned(s_out) => z_dut
-      );
-  
+    generic map(
+      FP_EXP => EXP_SIZE_T,
+      FP_LEN => WORD_SIZE_T
+    )
+    port map(
+      clk => clk,
+      rst => '0',
+      a_in => std_logic_vector(a_file),
+      b_in => std_logic_vector(b_file),
+      --a_in => a_tb,
+      --b_in => b_tb,
+      unsigned(s_out) => z_dut
+    );
+
   -- Instanciacion de la linea de retardo
   del: delay_gen
       generic map(WORD_SIZE_T, DELAY)

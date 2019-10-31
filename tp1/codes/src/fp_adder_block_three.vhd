@@ -27,12 +27,7 @@ begin
 
   check_significand: 
   process(sign_a,sign_b,significand_a_plus_b_with_carry)
-    --variable carry_significand: bit := '0';
-    --variable significand_msb: bit := '0';
   begin
-    --carry_significand := significand_a_plus_b_with_carry(FP_LEN-(FP_EXP+1)+1);
-    --significand_msb := significand_a_plus_b_with_carry(FP_LEN-(FP_EXP+1));
-
     -- If sign_a and sign_b are diferent
     if (sign_a /= sign_b) then
       
@@ -53,7 +48,6 @@ begin
       -- no complent2
       significand_s <= significand_a_plus_b_with_carry((FP_LEN-(FP_EXP+1)) downto 0);
       flag_s_twos_comp <= '0';
-      --carry_out <= std_logic(carry_significand);
       if (significand_a_plus_b_with_carry(FP_LEN-(FP_EXP+1)+1) = '1') then
         carry_out <= '1';
       else

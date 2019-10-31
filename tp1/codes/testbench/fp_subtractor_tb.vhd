@@ -1,3 +1,29 @@
+----------------------------------------------------------------------------------
+-- Title: FIUBA - 66.17 Sistemas Digitales
+-- Project: TP1 - Aritmetica de punto flotante
+----------------------------------------------------------------------------------
+-- Filename: fp_subtractor_tb.vhd
+---------------------------------------------------------------------------------- 
+-- Author: Federico Verstraeten
+-- Design Name:    Floating Point Subtractor - Test Bench
+-- Module Name:    FP Subtractor - TB
+-- @Copyright (C):
+--    This file is part of 'TP1 - Aritmetica de punto flotante'.
+--    Unauthorized copying or use of this file via any medium
+--    is strictly prohibited.
+----------------------------------------------------------------------------------
+-- Description: 
+--
+----------------------------------------------------------------------------------
+-- Dependencies:
+-- 
+----------------------------------------------------------------------------------
+-- Revision: 
+-- Revision 1.0
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+
 library ieee;
 library work;
 
@@ -107,19 +133,19 @@ begin
  
   -- Instanciacion del DUT
   DUT: fp_subtractor
-      generic map(
-        FP_EXP => EXP_SIZE_T,
-        FP_LEN => WORD_SIZE_T
-      )
-      port map(
-        clk => clk,
-        rst => '0',
-        a_in => std_logic_vector(a_file),
-        b_in => std_logic_vector(b_file),
-        --a_in => a_tb,
-        --b_in => b_tb,
-        unsigned(s_out) => z_dut
-      );
+    generic map(
+      FP_EXP => EXP_SIZE_T,
+      FP_LEN => WORD_SIZE_T
+    )
+    port map(
+      clk => clk,
+      rst => '0',
+      a_in => std_logic_vector(a_file),
+      b_in => std_logic_vector(b_file),
+      --a_in => a_tb,
+      --b_in => b_tb,
+      unsigned(s_out) => z_dut
+    );
   
   -- Instanciacion de la linea de retardo
   del: delay_gen
@@ -134,9 +160,9 @@ begin
     if falling_edge(clk) then
       ciclos <= ciclos + 1;
       
-      report integer'image(to_integer(unsigned(a_file))) & " - " 
-        & integer'image(to_integer(unsigned(b_file))) & " = " 
-        & integer'image(to_integer(z_dut));
+      --report integer'image(to_integer(unsigned(a_file))) & " - " 
+      --  & integer'image(to_integer(unsigned(b_file))) & " = " 
+      --  & integer'image(to_integer(z_dut));
       
       assert to_integer(z_del) = to_integer(z_dut) report
         "Error: Salida del DUT no coincide con referencia (salida del dut = " & 
