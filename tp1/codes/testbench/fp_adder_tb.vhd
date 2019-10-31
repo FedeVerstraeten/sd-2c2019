@@ -11,17 +11,15 @@ end entity fp_adder_tb;
 
 architecture fp_adder_tb_arch of fp_adder_tb is
   
-  constant TCK: time:= 20 ns;     -- periodo de reloj
-  constant DELAY: natural:= 4;    -- retardo de procesamiento del DUT
-  constant EXP_SIZE_T: natural:= 7;   -- tamaño exponente
-  constant WORD_SIZE_T: natural:= 25; -- tamaño de datos
+  constant TCK: time:= 20 ns;         -- clock period
+  constant DELAY: natural:= 4;        -- DUT delay
+  constant WORD_SIZE_T: natural:= 25; -- size exponent
+  constant EXP_SIZE_T: natural:= 7;   -- size float
   constant TEST_PATH: string :="/home/fverstra/Repository/sd-2c2019/tp1/test_files_2015/suma/";
-  constant TEST_FILE: string := TEST_PATH & "dummy_test_sum_float_25_7.txt";
+  constant TEST_FILE: string := TEST_PATH & "test_sum_float_25_7.txt";
 
   -- File input
-  --file f: text;
   file datos: text open read_mode is TEST_FILE;
-  --file f: text open read_mode is TEST_FILE;
 
   signal clk: std_logic:= '0';
   signal a_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
@@ -131,12 +129,14 @@ begin
   z_del <= unsigned(z_del_aux);
   
   -- Verificacion de la condicion
-  verificacion: process(clk)
+  verification: process(clk)
   begin
     if falling_edge(clk) then
-      report integer'image(to_integer(unsigned(a_file))) & " + " 
-        & integer'image(to_integer(unsigned(b_file))) & " = " 
-        & integer'image(to_integer(z_dut));
+      ciclos <= ciclos + 1;
+      --report integer'image(to_integer(unsigned(a_file))) & " + " 
+      --  & integer'image(to_integer(unsigned(b_file))) & " = " 
+      --  & integer'image(to_integer(z_dut));
+      
       assert to_integer(z_del) = to_integer(z_dut) report
         "Error: Salida del DUT no coincide con referencia (salida del dut = " & 
         integer'image(to_integer(z_dut)) &
@@ -146,11 +146,12 @@ begin
     else report
       "Simulacion ok";
       
-    --  if to_integer(z_del) /= to_integer(z_dut) then
-    --    errores <= errores + 1;
-    --  end if;
+    if to_integer(z_del) /= to_integer(z_dut) then
+        errores <= errores + 1;
+      end if;
     end if;
-    
-  end process;
+    report "Ciclos = " & integer'image(ciclos) & ", "
+      & "Errores =" & integer'image(errores);
+  end process verification;
 
 end architecture fp_adder_tb_arch; 

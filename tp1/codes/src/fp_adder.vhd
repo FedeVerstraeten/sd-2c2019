@@ -434,7 +434,7 @@ begin
     -- IN
     clk => clk,
     rst => rst,
-    -- signals from pipe_two
+    -- signals from pipe_one
     sign_a_d2 => sign_a_q1,
     sign_b_d2 => sign_b_q1,
     exponent_a_d2 => exponent_a_q1,
@@ -507,7 +507,7 @@ begin
   fp_adder_block_4 : fp_adder_block_four
   port map(
     -- IN
-    -- signals from block_four
+    -- signals from pipe_three
     sign_a => sign_a_q3,
     sign_b => sign_b_q3,
     exponent_a => exponent_a_q3,
