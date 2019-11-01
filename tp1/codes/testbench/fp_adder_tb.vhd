@@ -159,9 +159,9 @@ begin
   begin
     if falling_edge(clk) then
       ciclos <= ciclos + 1;
-      --report integer'image(to_integer(unsigned(a_file))) & " + " 
-      --  & integer'image(to_integer(unsigned(b_file))) & " = " 
-      --  & integer'image(to_integer(z_dut));
+      report integer'image(to_integer(unsigned(a_file))) & " + " 
+        & integer'image(to_integer(unsigned(b_file))) & " = " 
+        & integer'image(to_integer(z_dut));
       
       assert to_integer(z_del) = to_integer(z_dut) report
         "Error: Salida del DUT no coincide con referencia (salida del dut = " & 
