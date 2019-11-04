@@ -58,18 +58,14 @@ entity fp_multiplier is
 end fp_multiplier;
 
 architecture beh of fp_multiplier is
-
-  signal sign_a: std_logic;
-  signal sign_b: std_logic;
-  signal sign_res: std_logic := '0';
-  
-  
 begin
 
-  -- Sign calculation
-  sign_res <= a_in(FP_LEN-1) xor b_in(FP_LEN-1);
-
   multiply: process(a_in,b_in)
+    constant EXP_BIAS: integer := (2**(FP_EXP-1))-1;
+    constant EXP_MAX: integer := (2**(FP_EXP-1))-1;
+    constant EXP_MIN: integer := -((2**(FP_EXP-1))-2);
+
+    variable sign_res: std_logic := '0';  
     variable significand_a: unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0) := (others => '0');
     variable significand_b: unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0) := (others => '0');
     variable significand_a_times_b_2F_plus_2_length: unsigned( (2*(FP_LEN-FP_EXP))-1 downto 0) := (others => '0');
@@ -77,12 +73,16 @@ begin
     
     variable exp_a: unsigned(FP_EXP-1 downto 0);
     variable exp_b: unsigned(FP_EXP-1 downto 0);
+    variable exp_a_int: integer;
+    variable exp_b_int: integer;
     variable exp_res: unsigned (FP_EXP-1 downto 0);
     
-    variable exp_bias: integer := (2**(FP_EXP-1)) - 1;
     variable exp_increase: integer := 0;
   
     begin    
+      -- Sign calculation
+      sign_res := a_in(FP_LEN-1) xor b_in(FP_LEN-1);
+      
       -- Significan/Mantissa calculation      
       significand_a := unsigned('1' & a_in( (FP_LEN - (FP_EXP+1)) - 1 downto 0));
       significand_b := unsigned('1' & b_in( (FP_LEN - (FP_EXP+1)) - 1 downto 0));
@@ -99,21 +99,29 @@ begin
       end if;
       
       -- Exponent calculation
-      exp_a :=  ( unsigned(a_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(exp_bias,FP_EXP) );
-      exp_b :=  ( unsigned(b_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(exp_bias,FP_EXP) );
-      exp_res := (exp_a + exp_b + to_unsigned(exp_bias,FP_EXP) + to_unsigned(exp_increase,FP_EXP));  
-      
-      -- to Infinite validation
-      --if exp_aux(FP_EXP) = '1' then
-      --  exp_res := to_unsigned(2**FP_EXP-1,FP_EXP);
-      --  significand_a_times_b := to_unsigned(0,FP_LEN-(FP_EXP+1));
-      --else
-      --  exp_res(FP_LEN-1 downto 0) := exp_aux(FP_LEN-1 downto 0);
-      --end if ;
-      
-      ---- Load exponent and mantissa
-      s_out(FP_LEN-2 downto 0) <=  std_logic_vector(exp_res) & std_logic_vector(significand_a_times_b);  
-  end process;
+      exp_a :=  ( unsigned(a_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(EXP_BIAS,FP_EXP) );
+      exp_b :=  ( unsigned(b_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1)) - to_unsigned(EXP_BIAS,FP_EXP) );
+      exp_a_int := ( to_integer(unsigned(a_in((FP_LEN-1)-1 downto (FP_LEN-FP_EXP)-1))) - EXP_BIAS );
+      exp_b_int := ( to_integer(unsigned(b_in((FP_LEN-1)-1 downto (FP_LEN-FP_EXP)-1))) - EXP_BIAS );
 
-  s_out(FP_LEN-1) <= sign_res;
+      -- Exponent validation
+      -- Underflow
+      if (exp_a_int + exp_b_int + exp_increase < EXP_MIN) then
+        sign_res := '0';
+        exp_res := to_unsigned(0,FP_EXP);
+        significand_a_times_b := to_unsigned(0,FP_LEN-(FP_EXP+1));     
+      
+      -- Overflow 
+      -- Staruration: exp_res <= exp_max-1, sign_res <= all ones
+      elsif (exp_a_int + exp_b_int + exp_increase > EXP_MAX) then
+        exp_res := to_unsigned(2**FP_EXP-2,FP_EXP);
+        significand_a_times_b := to_unsigned(2**(FP_LEN-FP_EXP-1)-1,FP_LEN-(FP_EXP+1));
+      
+      else
+        exp_res := (exp_a + exp_b + to_unsigned(EXP_BIAS,FP_EXP) + to_unsigned(exp_increase,FP_EXP));
+      end if;
+      
+      -- Load exponent and mantissa
+      s_out(FP_LEN-1 downto 0) <= sign_res & std_logic_vector(exp_res) & std_logic_vector(significand_a_times_b);  
+  end process;
 end beh;
