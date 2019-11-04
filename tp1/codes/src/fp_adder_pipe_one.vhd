@@ -20,6 +20,7 @@ entity fp_adder_pipe_one is
     significand_a_d1: in unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
     significand_b_d1: in unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
     flag_swap_d1: in std_logic;
+    flag_infinite_d1: in std_logic;
     
     sign_a_q1: out std_logic;
     sign_b_q1: out std_logic;
@@ -27,8 +28,8 @@ entity fp_adder_pipe_one is
     exponent_b_q1: out unsigned(FP_EXP-1 downto 0);
     significand_a_q1: out unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
     significand_b_q1: out unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
-    flag_swap_q1: out std_logic
-    
+    flag_swap_q1: out std_logic;
+    flag_infinite_q1: out std_logic    
   );
   
 end fp_adder_pipe_one;
@@ -45,6 +46,7 @@ begin
       significand_a_q1 <= (others=>'0');
       significand_b_q1 <= (others=>'0');
       flag_swap_q1 <= '0';
+      flag_infinite_q1 <= '0';
     elsif(falling_edge(clk)) then
       sign_a_q1 <= sign_a_d1;
       sign_b_q1 <= sign_b_d1; 
@@ -53,6 +55,7 @@ begin
       significand_a_q1 <= significand_a_d1;
       significand_b_q1 <= significand_b_d1;
       flag_swap_q1 <= flag_swap_d1;
+      flag_infinite_q1 <= flag_infinite_d1;
     end if; 
   end process;
 end beh;

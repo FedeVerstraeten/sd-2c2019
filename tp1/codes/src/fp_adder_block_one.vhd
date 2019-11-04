@@ -18,7 +18,8 @@ entity fp_adder_block_one is
     exponent_b: out unsigned(FP_EXP-1 downto 0);
     significand_a: out unsigned((FP_LEN-(FP_EXP+1)) downto 0);
     significand_b: out unsigned((FP_LEN-(FP_EXP+1)) downto 0);
-    flag_swap: out std_logic
+    flag_swap: out std_logic;
+    flag_infinite: out std_logic
   );
   
 end fp_adder_block_one;
@@ -26,7 +27,6 @@ end fp_adder_block_one;
 architecture beh of fp_adder_block_one is
 
   signal b_aux: std_logic_vector((FP_LEN-(FP_EXP+1)) downto 0);
-  
 begin
   -- Sign
   sign_a <= a_in(FP_LEN-1);
@@ -47,6 +47,7 @@ begin
     when ( unsigned(a_in((FP_LEN-1)-1 downto (FP_LEN-FP_EXP)-1)) < unsigned(b_in((FP_LEN-1)-1 downto (FP_LEN-FP_EXP)-1)) )
     else unsigned(b_in( (FP_LEN-1) - 1 downto (FP_LEN-FP_EXP) - 1));
   
+
   -- If exp_a < exp_b then
   -- significand_a <= 1,mantissa_b
   -- else significand_a <= 1,mantissa_a
@@ -62,6 +63,15 @@ begin
   -- if sign_a != sing_b then complement2(b)
   significand_b <= ( unsigned(not b_aux) + to_unsigned(1, FP_LEN-(FP_EXP+1) ) ) 
     when (a_in(FP_LEN-1) xor b_in(FP_LEN-1)) = '1'
-    else unsigned(b_aux) when (a_in(FP_LEN-1) xor b_in(FP_LEN-1)) = '0';
+    else unsigned(b_aux) 
+    when (a_in(FP_LEN-1) xor b_in(FP_LEN-1)) = '0';
+
+  -- Infinite value validation
+  flag_infinite <= '1'
+    when ( (to_integer(unsigned(a_in((FP_LEN-1)-1 downto (FP_LEN-FP_EXP)-1)))= 2**FP_EXP-1)
+        and (to_integer(unsigned(a_in((FP_LEN-(FP_EXP+1))-1 downto 0))) = 0) )
+      or ( (to_integer(unsigned(b_in((FP_LEN-1)-1 downto (FP_LEN-FP_EXP)-1)))= 2**FP_EXP-1)
+        and (to_integer(unsigned(b_in((FP_LEN-(FP_EXP+1))-1 downto 0))) = 0) )
+    else '0';
 
 end beh;

@@ -60,8 +60,8 @@ end fp_adder;
 
 architecture beh of fp_adder is 
   
-  constant EXP_SIZE_T: natural:= 7;  
   constant WORD_SIZE_T: natural:= 25;
+  constant EXP_SIZE_T: natural:= 7;  
   
   component fp_adder_block_one
     generic(
@@ -80,7 +80,8 @@ architecture beh of fp_adder is
       exponent_b: out unsigned(FP_EXP-1 downto 0);
       significand_a: out unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
       significand_b: out unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
-      flag_swap: out std_logic
+      flag_swap: out std_logic;
+      flag_infinite: out std_logic
     );
   end component;
   
@@ -101,6 +102,7 @@ architecture beh of fp_adder is
       significand_a_d1: in unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
       significand_b_d1: in unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
       flag_swap_d1: in std_logic;
+      flag_infinite_d1: in std_logic;
     
       -- Port out
       sign_a_q1: out std_logic;
@@ -109,7 +111,8 @@ architecture beh of fp_adder is
       exponent_b_q1: out unsigned(FP_EXP-1 downto 0);
       significand_a_q1: out unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
       significand_b_q1: out unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
-      flag_swap_q1: out std_logic
+      flag_swap_q1: out std_logic;
+      flag_infinite_q1: out std_logic
     );
   end component;
   
@@ -155,6 +158,7 @@ architecture beh of fp_adder is
       flag_g_d2: in std_logic;
       flag_s_d2: in std_logic;
       flag_swap_d2: in std_logic;
+      flag_infinite_d2: in std_logic;
     
       -- Port out
       sign_a_q2: out std_logic;
@@ -164,7 +168,8 @@ architecture beh of fp_adder is
       flag_r_q2: out std_logic;
       flag_g_q2: out std_logic;
       flag_s_q2: out std_logic;
-      flag_swap_q2: out std_logic
+      flag_swap_q2: out std_logic;
+      flag_infinite_q2: out std_logic
     );
   end component;
   
@@ -208,6 +213,7 @@ architecture beh of fp_adder is
       flag_swap_d3: in std_logic;
       carry_out_d3: in std_logic;
       flag_s_twos_comp_d3: in std_logic;
+      flag_infinite_d3: in std_logic;
 
       -- Port out
       sign_a_q3: out std_logic;
@@ -219,7 +225,8 @@ architecture beh of fp_adder is
       significand_s_q3: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
       flag_swap_q3: out std_logic;
       carry_out_q3: out std_logic;
-      flag_s_twos_comp_q3: out std_logic    
+      flag_s_twos_comp_q3: out std_logic;
+      flag_infinite_q3: out std_logic
     );
   end component;
   
@@ -265,6 +272,7 @@ architecture beh of fp_adder is
       exponent_a_plus_b_d4: in unsigned(FP_EXP-1 downto 0);
       flag_r_add_d4: in std_logic;
       flag_s_add_d4: in std_logic;
+      flag_infinite_d4: in std_logic;
     
       -- Port out
       sign_a_q4: out std_logic;
@@ -274,7 +282,8 @@ architecture beh of fp_adder is
       significand_s_normalized_q4: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
       exponent_a_plus_b_q4: out unsigned(FP_EXP-1 downto 0);
       flag_r_add_q4: out std_logic;
-      flag_s_add_q4: out std_logic
+      flag_s_add_q4: out std_logic;
+      flag_infinite_q4: out std_logic
     );
   
   end component;
@@ -294,6 +303,7 @@ architecture beh of fp_adder is
       flag_s_add: in std_logic;
       significand_s_normalized: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
       exponent_a_plus_b: in unsigned(FP_EXP-1 downto 0);
+      flag_infinite: in std_logic;
     
       -- Port out
       s_out: out std_logic_vector( ( FP_LEN -1) downto 0)
@@ -309,6 +319,7 @@ architecture beh of fp_adder is
   signal significand_a: unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
   signal significand_b: unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
   signal flag_swap: std_logic;
+  signal flag_infinite: std_logic;
   
   -- Pipe one output
   signal sign_a_q1: std_logic;
@@ -318,7 +329,8 @@ architecture beh of fp_adder is
   signal significand_a_q1: unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
   signal significand_b_q1: unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0);
   signal flag_swap_q1: std_logic;
-  
+  signal flag_infinite_q1: std_logic;
+    
   -- Block two output
   signal significand_a_plus_b_with_carry: unsigned ( (FP_LEN-(FP_EXP+1) + 1) downto 0);
   signal flag_r: std_logic;
@@ -334,7 +346,8 @@ architecture beh of fp_adder is
   signal flag_g_q2: std_logic;
   signal flag_s_q2: std_logic;
   signal flag_swap_q2: std_logic;
-  
+  signal flag_infinite_q2: std_logic;
+
   -- Block three output
   signal significand_s: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
   signal carry_out: std_logic;
@@ -351,7 +364,8 @@ architecture beh of fp_adder is
   signal flag_swap_q3: std_logic;
   signal carry_out_q3: std_logic;
   signal flag_s_twos_comp_q3: std_logic;
-  
+  signal flag_infinite_q3: std_logic;
+
   -- Block four output
   signal significand_s_normalized: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
   signal exponent_a_plus_b: unsigned(FP_EXP-1 downto 0);
@@ -367,7 +381,8 @@ architecture beh of fp_adder is
   signal flag_s_add_q4: std_logic;
   signal significand_s_normalized_q4: unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
   signal exponent_a_plus_b_q4: unsigned(FP_EXP-1 downto 0);
-    
+  signal flag_infinite_q4: std_logic;  
+
 begin
 
   fp_adder_block_1: fp_adder_block_one
@@ -384,7 +399,8 @@ begin
     exponent_b => exponent_b,
     significand_a => significand_a,
     significand_b => significand_b,
-    flag_swap => flag_swap
+    flag_swap => flag_swap,
+    flag_infinite => flag_infinite
   );  
 
   fp_adder_pipe_1: fp_adder_pipe_one  
@@ -400,6 +416,7 @@ begin
     significand_a_d1 => significand_a,
     significand_b_d1 => significand_b,
     flag_swap_d1 => flag_swap,
+    flag_infinite_d1 => flag_infinite,
 
     -- OUT
     sign_a_q1 => sign_a_q1,
@@ -408,7 +425,8 @@ begin
     exponent_b_q1 => exponent_b_q1,
     significand_a_q1 => significand_a_q1,
     significand_b_q1 => significand_b_q1,
-    flag_swap_q1 => flag_swap_q1
+    flag_swap_q1 => flag_swap_q1,
+    flag_infinite_q1 => flag_infinite_q1
   );  
   
   fp_adder_block_2: fp_adder_block_two
@@ -439,6 +457,7 @@ begin
     sign_b_d2 => sign_b_q1,
     exponent_a_d2 => exponent_a_q1,
     flag_swap_d2 => flag_swap_q1,
+    flag_infinite_d2 => flag_infinite_q1,
 
     -- signals from block_two
     significand_a_plus_b_with_carry_d2 => significand_a_plus_b_with_carry,
@@ -454,7 +473,8 @@ begin
     flag_r_q2 => flag_r_q2,
     flag_g_q2 => flag_g_q2,
     flag_s_q2 => flag_s_q2,
-    flag_swap_q2 => flag_swap_q2
+    flag_swap_q2 => flag_swap_q2,
+    flag_infinite_q2 => flag_infinite_q2
   );
   
   fp_adder_block_3: fp_adder_block_three
@@ -485,6 +505,8 @@ begin
     flag_g_d3 => flag_g_q2,
     flag_s_d3 => flag_s_q2,
     flag_swap_d3 => flag_swap_q2,
+    flag_infinite_d3 => flag_infinite_q2,
+
 
     -- signals from block_three
     significand_s_d3 => significand_s,
@@ -501,7 +523,8 @@ begin
     flag_swap_q3 => flag_swap_q3,
     significand_s_q3 => significand_s_q3,
     carry_out_q3 => carry_out_q3,
-    flag_s_twos_comp_q3 => flag_s_twos_comp_q3
+    flag_s_twos_comp_q3 => flag_s_twos_comp_q3,
+    flag_infinite_q3 => flag_infinite_q3
   );
   
   fp_adder_block_4 : fp_adder_block_four
@@ -534,6 +557,7 @@ begin
     sign_b_d4 => sign_b_q3,
     flag_swap_d4 => flag_swap_q3,
     flag_s_twos_comp_d4 => flag_s_twos_comp_q3,
+    flag_infinite_d4 => flag_infinite_q3,
 
     -- signals from block_four
     significand_s_normalized_d4 => significand_s_normalized,
@@ -549,7 +573,8 @@ begin
     significand_s_normalized_q4 => significand_s_normalized_q4,
     exponent_a_plus_b_q4 => exponent_a_plus_b_q4,
     flag_r_add_q4 => flag_r_add_q4,
-    flag_s_add_q4 => flag_s_add_q4
+    flag_s_add_q4 => flag_s_add_q4,
+    flag_infinite_q4 => flag_infinite_q4
   );
   
   fp_adder_block_5 : fp_adder_block_five
@@ -564,6 +589,7 @@ begin
     exponent_a_plus_b => exponent_a_plus_b_q4,
     flag_r_add => flag_r_add_q4,
     flag_s_add => flag_s_add_q4,
+    flag_infinite => flag_infinite_q4,
 
     -- OUT  
     s_out => s_out

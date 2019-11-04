@@ -18,7 +18,8 @@ entity fp_adder_block_five is
     flag_s_add: in std_logic;
     significand_s_normalized: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
     exponent_a_plus_b: in unsigned(FP_EXP-1 downto 0);
-    
+    flag_infinite: in std_logic;
+
     s_out: out std_logic_vector( ( FP_LEN -1) downto 0)
   );
   
@@ -40,12 +41,16 @@ begin
                     
   significand_s_normalized_rounded <= unsigned( '1' & significand_s_normalized_rounded_aux( (FP_LEN-(FP_EXP+1)) downto 1) ) 
     when (significand_s_normalized_rounded_aux( FP_LEN - FP_EXP ) = '1') 
+    -- Infinite value validation
+    else to_unsigned(0,FP_LEN-FP_EXP) when flag_infinite = '1'
     else significand_s_normalized_rounded_aux( ( FP_LEN - (FP_EXP+1) ) downto 0 );
       
   exponent_add_one <= ( (exponent_add_one( (FP_EXP-2) downto 0 )'range =>'0' ) & '1' );
       
   exponent_s <= ( exponent_a_plus_b + exponent_add_one )
     when (significand_s_normalized_rounded_aux( FP_LEN - FP_EXP ) = '1')
+    -- Infinite value validation
+    else to_unsigned(2**FP_EXP-1,FP_EXP) when flag_infinite = '1'
     else exponent_a_plus_b;
   
   -- According to the sign rule table

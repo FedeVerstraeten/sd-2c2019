@@ -37,7 +37,7 @@ begin
   begin
     index_aux := 0;
     if (sign_a /= sign_b) or carry_out='0' then
-      while (significand_s((FP_LEN-(FP_EXP+1)) - index_aux)= '0') loop
+      while (significand_s((FP_LEN-(FP_EXP+1)) - index_aux) = '0' and index_aux<(FP_LEN-(FP_EXP+1))) loop
         index_aux := index_aux + 1;
       end loop;
       index_shift <= to_unsigned(index_aux,5);    

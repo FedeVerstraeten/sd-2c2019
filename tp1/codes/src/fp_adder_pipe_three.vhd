@@ -23,7 +23,8 @@ entity fp_adder_pipe_three is
     significand_s_d3: in unsigned((FP_LEN - (FP_EXP+1)) downto 0);
     carry_out_d3: in std_logic;
     flag_s_twos_comp_d3: in std_logic;
-    
+    flag_infinite_d3: in std_logic;
+
     sign_a_q3: out std_logic;
     sign_b_q3: out std_logic;
     exponent_a_q3: out unsigned(FP_EXP-1 downto 0);
@@ -33,7 +34,8 @@ entity fp_adder_pipe_three is
     flag_swap_q3: out std_logic;
     significand_s_q3: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
     carry_out_q3: out std_logic;
-    flag_s_twos_comp_q3: out std_logic
+    flag_s_twos_comp_q3: out std_logic;
+    flag_infinite_q3: out std_logic
   );
 end fp_adder_pipe_three;
 
@@ -52,6 +54,7 @@ begin
       significand_s_q3 <= (others => '0');
       carry_out_q3 <= '0';
       flag_s_twos_comp_q3 <= '0';
+      flag_infinite_q3 <= '0';
     elsif(falling_edge(clk)) then
       sign_a_q3 <= sign_a_d3;
       sign_b_q3 <= sign_b_d3; 
@@ -63,6 +66,7 @@ begin
       significand_s_q3 <= significand_s_d3;
       carry_out_q3 <= carry_out_d3;
       flag_s_twos_comp_q3 <= flag_s_twos_comp_d3;
+      flag_infinite_q3 <= flag_infinite_d3;
     end if; 
   end process;
 end beh;
