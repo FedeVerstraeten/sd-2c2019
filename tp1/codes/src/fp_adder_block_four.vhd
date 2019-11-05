@@ -22,7 +22,9 @@ entity fp_adder_block_four is
     significand_s_normalized: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
     exponent_a_plus_b: out unsigned(FP_EXP-1 downto 0);
     flag_r_add: out std_logic;
-    flag_s_add: out std_logic
+    flag_s_add: out std_logic;
+    flag_overflow: out std_logic;
+    flag_underflow: out std_logic
   );
   
 end fp_adder_block_four;
@@ -56,15 +58,46 @@ begin
     -- significand_s & flag_g & 0..0
     else ( significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index_shift) downto 0) & flag_g & ( (significand_s( (to_integer(index_shift) - 2) downto 0)'range) => '0') ) 
       when to_integer(index_shift) >= 2
-    -- underflow 
+    -- significand zero
     else ( flag_g & (significand_s( (FP_LEN - (FP_EXP+1) - 1 ) downto 0)'range => '0') ) 
       when (to_integer(index_shift) = (FP_LEN-(FP_EXP+1)+1) and flag_g = '1') 
     else ( others => '0');
 
   -- with carry and sign_a = sing_b
-  exponent_a_plus_b <= ( exponent_a + to_unsigned(1,FP_EXP) )
-  when ((sign_a xor sign_b)='0' and carry_out='1') 
-    else ( exponent_a - index_shift);
+  --exponent_a_plus_b <= ( exponent_a + to_unsigned(1,FP_EXP) )
+  --when ((sign_a xor sign_b)='0' and carry_out='1') 
+  --  else ( exponent_a - index_shift);
+
+  -- Underflow & Overflow validation
+  limits_validation:process(sign_a,sign_b,carry_out,exponent_a,index_shift)
+    constant EXP_BIAS: integer := (2**(FP_EXP-1))-1;
+    constant EXP_MAX: integer := (2**(FP_EXP-1))-1;
+    constant EXP_MIN: integer := -((2**(FP_EXP-1))-2);
+    variable exp_a_int: integer;
+  begin
+    
+    exp_a_int := (to_integer(exponent_a(FP_EXP-1 downto 0)) - EXP_BIAS);
+    
+    -- with carry and sign_a = sing_b
+    if ((sign_a xor sign_b)='0' and carry_out='1') then    
+      -- Overflow
+      if ( exp_a_int+1 > EXP_MAX) then
+        flag_overflow <= '1';
+      else
+        exponent_a_plus_b <= ( exponent_a + to_unsigned(1,FP_EXP));
+        flag_overflow <= '0';
+      end if;
+ 
+    else
+      -- Underflow
+      if (exp_a_int - to_integer(index_shift) < EXP_MIN) then
+        flag_underflow <= '1';
+      else
+        exponent_a_plus_b <= (exponent_a - index_shift);
+        flag_underflow <= '0';
+      end if;
+    end if;
+  end process limits_validation;
 
   flag_r_add <= '0';
   flag_s_add <= '0';

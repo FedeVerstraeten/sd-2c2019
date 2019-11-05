@@ -23,6 +23,8 @@ entity fp_adder_pipe_four is
     flag_r_add_d4: in std_logic;
     flag_s_add_d4: in std_logic;
     flag_infinite_d4: in std_logic;
+    flag_overflow_d4: in std_logic;
+    flag_underflow_d4: in std_logic;
     
     sign_a_q4: out std_logic;
     sign_b_q4: out std_logic;
@@ -32,7 +34,9 @@ entity fp_adder_pipe_four is
     exponent_a_plus_b_q4: out unsigned(FP_EXP-1 downto 0);
     flag_r_add_q4: out std_logic;
     flag_s_add_q4: out std_logic;
-    flag_infinite_q4: out std_logic
+    flag_infinite_q4: out std_logic;
+    flag_overflow_q4: out std_logic;
+    flag_underflow_q4: out std_logic
   );
   
 end fp_adder_pipe_four;
@@ -51,6 +55,8 @@ begin
       significand_s_normalized_q4 <= (others => '0');
       exponent_a_plus_b_q4 <= (others => '0');
       flag_infinite_q4 <= '0';
+      flag_overflow_q4 <= '0';
+      flag_underflow_q4 <= '0';
     elsif(falling_edge(clk)) then
       sign_a_q4 <= sign_a_d4;
       sign_b_q4 <= sign_b_d4; 
@@ -61,6 +67,8 @@ begin
       significand_s_normalized_q4 <= significand_s_normalized_d4;
       exponent_a_plus_b_q4 <= exponent_a_plus_b_d4;
       flag_infinite_q4 <= flag_infinite_d4;
+      flag_overflow_q4 <= flag_overflow_d4;
+      flag_underflow_q4 <= flag_underflow_d4;
     end if; 
   end process;
 end beh;
