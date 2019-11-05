@@ -69,7 +69,7 @@ begin
     variable significand_a: unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0) := (others => '0');
     variable significand_b: unsigned( ( FP_LEN - (FP_EXP+1) ) downto 0) := (others => '0');
     variable significand_a_times_b_2F_plus_2_length: unsigned( (2*(FP_LEN-FP_EXP))-1 downto 0) := (others => '0');
-    variable significand_a_times_b: unsigned ( (FP_LEN-(FP_EXP+1)) - 1 downto 0) := (others => '0');
+    variable mantissa_a_times_b: unsigned ( (FP_LEN-(FP_EXP+1)) - 1 downto 0) := (others => '0');
     
     variable exp_a: unsigned(FP_EXP-1 downto 0);
     variable exp_b: unsigned(FP_EXP-1 downto 0);
@@ -92,10 +92,10 @@ begin
       -- if the MSB is equal to 1
       if (significand_a_times_b_2F_plus_2_length(2*(FP_LEN-FP_EXP)-1) = '1' ) then
         exp_increase := 1;
-        significand_a_times_b :=  significand_a_times_b_2F_plus_2_length( (2*(FP_LEN-FP_EXP))-2 downto (FP_LEN-FP_EXP));
+        mantissa_a_times_b :=  significand_a_times_b_2F_plus_2_length( (2*(FP_LEN-FP_EXP))-2 downto (FP_LEN-FP_EXP));
       else
         exp_increase := 0 ;
-        significand_a_times_b :=  significand_a_times_b_2F_plus_2_length( (2*(FP_LEN-FP_EXP))-3 downto (FP_LEN-FP_EXP)-1);
+        mantissa_a_times_b :=  significand_a_times_b_2F_plus_2_length( (2*(FP_LEN-FP_EXP))-3 downto (FP_LEN-FP_EXP)-1);
       end if;
       
       -- Exponent calculation
@@ -109,19 +109,19 @@ begin
       if (exp_a_int + exp_b_int + exp_increase < EXP_MIN) then
         sign_res := '0';
         exp_res := to_unsigned(0,FP_EXP);
-        significand_a_times_b := to_unsigned(0,FP_LEN-(FP_EXP+1));     
+        mantissa_a_times_b := to_unsigned(0,FP_LEN-(FP_EXP+1));     
       
       -- Overflow 
       -- Staruration: exp_res <= exp_max-1, sign_res <= all ones
       elsif (exp_a_int + exp_b_int + exp_increase > EXP_MAX) then
         exp_res := to_unsigned(2**FP_EXP-2,FP_EXP);
-        significand_a_times_b := to_unsigned(2**(FP_LEN-FP_EXP-1)-1,FP_LEN-(FP_EXP+1));
+        mantissa_a_times_b := to_unsigned(2**(FP_LEN-FP_EXP-1)-1,FP_LEN-(FP_EXP+1));
       
       else
         exp_res := (exp_a + exp_b + to_unsigned(EXP_BIAS,FP_EXP) + to_unsigned(exp_increase,FP_EXP));
       end if;
       
       -- Load exponent and mantissa
-      s_out(FP_LEN-1 downto 0) <= sign_res & std_logic_vector(exp_res) & std_logic_vector(significand_a_times_b);  
+      s_out(FP_LEN-1 downto 0) <= sign_res & std_logic_vector(exp_res) & std_logic_vector(mantissa_a_times_b);  
   end process;
 end beh;
