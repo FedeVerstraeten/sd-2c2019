@@ -60,8 +60,8 @@ end fp_subtractor;
 
 architecture beh of fp_subtractor is 
   
-  constant EXP_SIZE_T: natural:= 7;  
   constant WORD_SIZE_T: natural:= 25;
+  constant EXP_SIZE_T: natural:= 7;  
   
   component fp_adder
    generic(

@@ -39,8 +39,8 @@ architecture fp_adder_tb_arch of fp_adder_tb is
   
   constant TCK: time:= 20 ns;         -- clock period
   constant DELAY: natural:= 4;        -- DUT delay
-  constant WORD_SIZE_T: natural:= 25; -- size exponent
-  constant EXP_SIZE_T: natural:= 7;   -- size float
+  constant WORD_SIZE_T: natural:= 25; -- size float
+  constant EXP_SIZE_T: natural:= 7;   -- size exponent
   constant TEST_PATH: string :="/home/fverstra/Repository/sd-2c2019/tp1/test_files_2015/suma/";
   constant TEST_FILE: string := TEST_PATH & "test_sum_float_25_7.txt";
 
@@ -65,8 +65,8 @@ architecture fp_adder_tb_arch of fp_adder_tb is
   signal z_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
   
   -- Prueba con valores harcodeados
-  signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
-  signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  --signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  --signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
 
 
   -- Component to test  
@@ -132,8 +132,8 @@ begin
   end process Test_Sequence;
   
   -- test_sum_float_25_7.txt
-  --a_tb <= std_logic_vector(to_unsigned(24867535,25));
-  --b_tb <= std_logic_vector(to_unsigned(24577755,25));
+  --a_tb <= std_logic_vector(to_unsigned(8002001,25));
+  --b_tb <= std_logic_vector(to_unsigned(8121616,25));
  
   -- Instanciacion del DUT
   DUT: fp_adder
@@ -168,7 +168,7 @@ begin
   b_del <= unsigned(b_del_aux);
   z_del <= unsigned(z_del_aux);
   
-  -- Verificacion de la condicion
+  --Verificacion de la condicion
   verification: process(clk)
   begin
     if falling_edge(clk) then

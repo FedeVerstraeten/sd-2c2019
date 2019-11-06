@@ -62,7 +62,7 @@ begin
   -- Zero significand validation
   else to_unsigned(0,FP_LEN-(FP_EXP+1)) when flag_zero_significand = '1'
   -- Overflow validation 
- -- else to_unsigned(2**(FP_LEN-FP_EXP-1)-1,FP_LEN-(FP_EXP+1)) when (flag_overflow = '1' or (to_integer(exponent_a_plus_b) + to_integer(exponent_add_one))>(2**(FP_EXP-1))-1)
+  --else to_unsigned(2**(FP_LEN-FP_EXP-1)-1,FP_LEN-(FP_EXP+1)) when flag_overflow = '1'
   -- Underflow validation
   else to_unsigned(0,FP_LEN-(FP_EXP+1)) when flag_underflow ='1'
   else significand_s_normalized_rounded_aux(FP_LEN-(FP_EXP+1)-1 downto 0 );
@@ -75,13 +75,12 @@ begin
     -- Zero significand validation
     else to_unsigned(0,FP_EXP) when flag_zero_significand = '1'
     -- Overflow validation
-  --  else to_unsigned(2**FP_EXP-2,FP_EXP) when (flag_overflow = '1' or (to_integer(exponent_a_plus_b) + to_integer(exponent_add_one))>(2**(FP_EXP-1))-1)
+    --else to_unsigned(2**FP_EXP-2,FP_EXP) when flag_overflow = '1'
     -- Underflow validation
     else to_unsigned(0,FP_EXP) when (flag_underflow = '1')
     else exponent_a_plus_b;
   
   -- Concat sign + exp + mantissa
-  --s_out <= ( sign_s & std_logic_vector(exponent_s) & std_logic_vector(significand_s_normalized_rounded((FP_LEN-(FP_EXP+1)-1) downto 0)));
   s_out <= ( sign_s & std_logic_vector(exponent_s) & std_logic_vector(mantissa_s(FP_LEN-(FP_EXP+1)-1 downto 0)));
         
 end beh;
