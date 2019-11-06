@@ -21,6 +21,7 @@ entity fp_adder_block_five is
     flag_infinite: in std_logic;
     flag_overflow: in std_logic;
     flag_underflow: in std_logic;
+    flag_zero_significand: in std_logic;
 
     s_out: out std_logic_vector( ( FP_LEN -1) downto 0)
   );
@@ -46,6 +47,7 @@ begin
         sign_b when (( sign_a /= sign_b ) and flag_swap = '1') else
         sign_a when (( sign_a /= sign_b ) and flag_swap = '0' and flag_s_twos_comp = '0') else
         sign_b when (( sign_a /= sign_b ) and flag_swap = '0' and flag_s_twos_comp = '1') else
+           '0' when flag_zero_significand = '1' else
            '0' when flag_underflow = '1';
 
   -- SIGNIFICAND
@@ -57,6 +59,8 @@ begin
   when (significand_s_normalized_rounded_aux(FP_LEN - FP_EXP) = '1') 
   -- Infinite value validation
   else to_unsigned(0,FP_LEN-(FP_EXP+1)) when flag_infinite = '1'
+  -- Zero significand validation
+  else to_unsigned(0,FP_LEN-(FP_EXP+1)) when flag_zero_significand = '1'
   -- Overflow validation 
  -- else to_unsigned(2**(FP_LEN-FP_EXP-1)-1,FP_LEN-(FP_EXP+1)) when (flag_overflow = '1' or (to_integer(exponent_a_plus_b) + to_integer(exponent_add_one))>(2**(FP_EXP-1))-1)
   -- Underflow validation
@@ -68,6 +72,8 @@ begin
     when (significand_s_normalized_rounded_aux( FP_LEN - FP_EXP ) = '1')
     -- Infinite value validation
     else to_unsigned(2**FP_EXP-1,FP_EXP) when flag_infinite = '1'
+    -- Zero significand validation
+    else to_unsigned(0,FP_EXP) when flag_zero_significand = '1'
     -- Overflow validation
   --  else to_unsigned(2**FP_EXP-2,FP_EXP) when (flag_overflow = '1' or (to_integer(exponent_a_plus_b) + to_integer(exponent_add_one))>(2**(FP_EXP-1))-1)
     -- Underflow validation

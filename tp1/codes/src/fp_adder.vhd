@@ -54,7 +54,7 @@ entity fp_adder is
     a_in: in std_logic_vector(FP_LEN-1 downto 0);
     b_in: in std_logic_vector(FP_LEN-1 downto 0);
     
-    s_out: out std_logic_vector( ( FP_LEN -1) downto 0)
+    s_out: out std_logic_vector(FP_LEN -1 downto 0)
   );
 end fp_adder;
 
@@ -252,7 +252,8 @@ architecture beh of fp_adder is
       flag_r_add: out std_logic;
       flag_s_add: out std_logic;
       flag_overflow: out std_logic;
-      flag_underflow: out std_logic
+      flag_underflow: out std_logic;
+      flag_zero_significand: out std_logic
     );
   end component;
   
@@ -277,6 +278,7 @@ architecture beh of fp_adder is
       flag_infinite_d4: in std_logic;
       flag_overflow_d4: in std_logic;
       flag_underflow_d4: in std_logic;
+      flag_zero_significand_d4: in std_logic;
     
       -- Port out
       sign_a_q4: out std_logic;
@@ -289,7 +291,8 @@ architecture beh of fp_adder is
       flag_s_add_q4: out std_logic;
       flag_infinite_q4: out std_logic;
       flag_overflow_q4: out std_logic;
-      flag_underflow_q4: out std_logic
+      flag_underflow_q4: out std_logic;
+      flag_zero_significand_q4: out std_logic
     );
   
   end component;
@@ -312,6 +315,7 @@ architecture beh of fp_adder is
       flag_infinite: in std_logic;
       flag_overflow: in std_logic;
       flag_underflow: in std_logic;
+      flag_zero_significand: in std_logic;
     
       -- Port out
       s_out: out std_logic_vector( ( FP_LEN -1) downto 0)
@@ -381,6 +385,7 @@ architecture beh of fp_adder is
   signal flag_s_add: std_logic;
   signal flag_overflow_add: std_logic;
   signal flag_underflow_add: std_logic;
+  signal flag_zero_significand_add: std_logic;
   
   -- Pipe four output
   signal sign_a_q4: std_logic;
@@ -394,6 +399,7 @@ architecture beh of fp_adder is
   signal flag_infinite_q4: std_logic;  
   signal flag_overflow_q4: std_logic;
   signal flag_underflow_q4: std_logic;
+  signal flag_zero_significand_q4: std_logic;
 
 begin
 
@@ -558,7 +564,8 @@ begin
     flag_r_add => flag_r_add,
     flag_s_add => flag_s_add,
     flag_overflow => flag_overflow_add,
-    flag_underflow => flag_underflow_add
+    flag_underflow => flag_underflow_add,
+    flag_zero_significand => flag_zero_significand_add
   );
   
   fp_adder_pipe_4 : fp_adder_pipe_four 
@@ -580,6 +587,7 @@ begin
     flag_s_add_d4 => flag_s_add,
     flag_overflow_d4 => flag_overflow_add,
     flag_underflow_d4 => flag_underflow_add,
+    flag_zero_significand_d4 => flag_zero_significand_add,
     
     -- OUT
     sign_a_q4 => sign_a_q4,
@@ -592,7 +600,8 @@ begin
     flag_s_add_q4 => flag_s_add_q4,
     flag_infinite_q4 => flag_infinite_q4,
     flag_overflow_q4 => flag_overflow_q4,
-    flag_underflow_q4 => flag_underflow_q4
+    flag_underflow_q4 => flag_underflow_q4,
+    flag_zero_significand_q4 => flag_zero_significand_q4
   );
   
   fp_adder_block_5 : fp_adder_block_five
@@ -610,6 +619,7 @@ begin
     flag_infinite => flag_infinite_q4,
     flag_overflow => flag_overflow_q4,
     flag_underflow => flag_underflow_q4,
+    flag_zero_significand => flag_zero_significand_q4,
 
     -- OUT  
     s_out => s_out

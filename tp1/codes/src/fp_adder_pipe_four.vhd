@@ -25,7 +25,8 @@ entity fp_adder_pipe_four is
     flag_infinite_d4: in std_logic;
     flag_overflow_d4: in std_logic;
     flag_underflow_d4: in std_logic;
-    
+    flag_zero_significand_d4: in std_logic;
+
     sign_a_q4: out std_logic;
     sign_b_q4: out std_logic;
     flag_swap_q4: out std_logic;
@@ -36,7 +37,8 @@ entity fp_adder_pipe_four is
     flag_s_add_q4: out std_logic;
     flag_infinite_q4: out std_logic;
     flag_overflow_q4: out std_logic;
-    flag_underflow_q4: out std_logic
+    flag_underflow_q4: out std_logic;
+    flag_zero_significand_q4: out std_logic
   );
   
 end fp_adder_pipe_four;
@@ -57,6 +59,7 @@ begin
       flag_infinite_q4 <= '0';
       flag_overflow_q4 <= '0';
       flag_underflow_q4 <= '0';
+      flag_zero_significand_q4 <= '0';
     elsif(falling_edge(clk)) then
       sign_a_q4 <= sign_a_d4;
       sign_b_q4 <= sign_b_d4; 
@@ -69,6 +72,7 @@ begin
       flag_infinite_q4 <= flag_infinite_d4;
       flag_overflow_q4 <= flag_overflow_d4;
       flag_underflow_q4 <= flag_underflow_d4;
+      flag_zero_significand_q4 <= flag_zero_significand_d4;
     end if; 
   end process;
 end beh;

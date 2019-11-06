@@ -51,18 +51,22 @@ architecture fp_adder_tb_arch of fp_adder_tb is
   signal a_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal b_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal z_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
+  signal a_del: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
+  signal b_del: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal z_del: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal z_dut: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   
   signal ciclos: integer := 0;
   signal errores: integer := 0;
   
-  -- La senal z_del_aux se define por un problema de conversión
+  -- se define por un problema de conversión
+  signal a_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
+  signal b_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal z_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
   
   -- Prueba con valores harcodeados
-  --signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
-  --signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  signal a_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
+  signal b_tb: std_logic_vector(WORD_SIZE_T-1 downto 0) := (others => '0');
 
 
   -- Component to test  
@@ -128,8 +132,8 @@ begin
   end process Test_Sequence;
   
   -- test_sum_float_25_7.txt
-  --a_tb <= std_logic_vector(to_unsigned(8153147,25));
-  --b_tb <= std_logic_vector(to_unsigned(24788495,25));
+  --a_tb <= std_logic_vector(to_unsigned(24867535,25));
+  --b_tb <= std_logic_vector(to_unsigned(24577755,25));
  
   -- Instanciacion del DUT
   DUT: fp_adder
@@ -148,10 +152,20 @@ begin
     );
 
   -- Instanciacion de la linea de retardo
-  del: delay_gen
+  del_a: delay_gen
+      generic map(WORD_SIZE_T, DELAY)
+      port map(clk, std_logic_vector(a_file), a_del_aux);
+
+  del_b: delay_gen
+      generic map(WORD_SIZE_T, DELAY)
+      port map(clk, std_logic_vector(b_file), b_del_aux);
+
+  del_z: delay_gen
       generic map(WORD_SIZE_T, DELAY)
       port map(clk, std_logic_vector(z_file), z_del_aux);
         
+  a_del <= unsigned(a_del_aux);
+  b_del <= unsigned(b_del_aux);
   z_del <= unsigned(z_del_aux);
   
   -- Verificacion de la condicion
@@ -159,15 +173,12 @@ begin
   begin
     if falling_edge(clk) then
       ciclos <= ciclos + 1;
-      report integer'image(to_integer(unsigned(a_file))) & " + " 
-        & integer'image(to_integer(unsigned(b_file))) & " = " 
-        & integer'image(to_integer(z_dut));
-      
-      assert to_integer(z_del) = to_integer(z_dut) report
-        "Error: Salida del DUT no coincide con referencia (salida del dut = " & 
-        integer'image(to_integer(z_dut)) &
-        ", salida del archivo = " &
-        integer'image(to_integer(z_del)) & ")"
+      assert to_integer(z_del) = to_integer(z_dut)
+        report "Calculation performed " & 
+              integer'image(to_integer(unsigned(a_del))) & " + " &
+              integer'image(to_integer(unsigned(b_del))) & " = " &
+              integer'image(to_integer(z_dut)) & " and the expected result was " &
+              integer'image(to_integer(unsigned(z_del)))
         severity warning;
     else report
       "Simulacion ok";

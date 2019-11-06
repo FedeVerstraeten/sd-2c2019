@@ -13,18 +13,19 @@ entity fp_adder_block_four is
     sign_a: in std_logic;
     sign_b: in std_logic;
     exponent_a: in unsigned(FP_EXP-1 downto 0);
-    significand_s: in unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+    significand_s: in unsigned(FP_LEN-(FP_EXP+1) downto 0);
     carry_out: in std_logic; 
     flag_r: in std_logic;
     flag_g: in std_logic;
     flag_s: in std_logic;
     
-    significand_s_normalized: out unsigned(( FP_LEN - (FP_EXP+1) ) downto 0);
+    significand_s_normalized: out unsigned(FP_LEN-(FP_EXP+1) downto 0);
     exponent_a_plus_b: out unsigned(FP_EXP-1 downto 0);
     flag_r_add: out std_logic;
     flag_s_add: out std_logic;
     flag_overflow: out std_logic;
-    flag_underflow: out std_logic
+    flag_underflow: out std_logic;
+    flag_zero_significand: out std_logic
   );
   
 end fp_adder_block_four;
@@ -67,6 +68,9 @@ begin
   --exponent_a_plus_b <= ( exponent_a + to_unsigned(1,FP_EXP) )
   --when ((sign_a xor sign_b)='0' and carry_out='1') 
   --  else ( exponent_a - index_shift);
+
+  -- Zero significand
+  flag_zero_significand <= '1' when to_integer(significand_s)=0 else '0';
 
   -- Underflow & Overflow validation
   limits_validation:process(sign_a,sign_b,carry_out,exponent_a,index_shift)
