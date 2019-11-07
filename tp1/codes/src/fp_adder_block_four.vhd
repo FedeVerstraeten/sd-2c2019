@@ -47,22 +47,42 @@ begin
     end if;
   end process right_shift_index;
 
-  -- if sign_a=sign_b and carry_out=1
-  significand_s_normalized <= ( carry_out & significand_s((FP_LEN-(FP_EXP+1)) downto 1) ) 
-  when ((sign_a xor sign_b)='0' and carry_out='1')
+significand_place: process (carry_out,significand_s,sign_a,sign_b,index_shift,flag_g)
+    variable significand_s_normalized_aux: unsigned(FP_LEN-(FP_EXP+1) downto 0);
+    variable idx: integer :=0;
+  begin
+    -- if sign_a=sign_b and carry_out=1
+    if ((sign_a xor sign_b)='0' and carry_out='1') then
+      significand_s_normalized <= (carry_out & significand_s((FP_LEN-(FP_EXP+1)) downto 1));
+    
     --significand_s without left shift
-    else significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index_shift) downto 0)
-      when to_integer(index_shift) = 0
+    elsif (to_integer(index_shift)=0) then
+      significand_s_normalized <=  significand_s((FP_LEN-(FP_EXP+1))-0 downto 0);
+    
     -- significand_s & flag_g
-    else ( significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index_shift) downto 0) & flag_g ) 
-      when to_integer(index_shift) = 1 
-    -- significand_s & flag_g & 0..0
-    else ( significand_s( (FP_LEN-(FP_EXP+1)) - to_integer(index_shift) downto 0) & flag_g & ( (significand_s( (to_integer(index_shift) - 2) downto 0)'range) => '0') ) 
-      when to_integer(index_shift) >= 2
+    elsif (to_integer(index_shift)=1) then
+      significand_s_normalized <=  significand_s((FP_LEN-(FP_EXP+1))-1 downto 0) & '0' ;
+    
+    -- significand_s & flag_g & 0..0 
+    elsif (to_integer(index_shift)>=2) then
+      idx :=0;    
+      significand_s_normalized_aux := (others => '0');
+  
+      while (idx <= to_integer(index_shift) and idx <= (FP_LEN-(FP_EXP+1))) loop
+        significand_s_normalized_aux((FP_LEN-(FP_EXP+1)) - idx) := significand_s(to_integer(index_shift) - idx);
+        idx := idx+1;
+      end loop;
+      significand_s_normalized_aux(FP_LEN-(FP_EXP+1) - idx + 1) := flag_g;
+    
+      significand_s_normalized <= significand_s_normalized_aux(FP_LEN-(FP_EXP+1) downto 0);
+    
     -- significand zero
-    else ( flag_g & (significand_s( (FP_LEN - (FP_EXP+1) - 1 ) downto 0)'range => '0') ) 
-      when (to_integer(index_shift) = (FP_LEN-(FP_EXP+1)+1) and flag_g = '1') 
-    else ( others => '0');
+    elsif (to_integer(index_shift)=(FP_LEN-(FP_EXP+1)+1) and flag_g='1') then
+      significand_s_normalized <= (flag_g & (significand_s( (FP_LEN - (FP_EXP+1) - 1 ) downto 0)'range => '0'));
+    else
+      significand_s_normalized <= (others => '0');
+    end if;
+  end process significand_place;
 
   -- with carry and sign_a = sing_b
   --exponent_a_plus_b <= ( exponent_a + to_unsigned(1,FP_EXP) )

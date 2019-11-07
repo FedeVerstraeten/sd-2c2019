@@ -54,30 +54,32 @@ begin
   significand_add_one_with_carry <= ( (significand_add_one_with_carry( (FP_LEN-(FP_EXP+1)+1) downto 1 )'range =>'0' ) & (flag_s_add or flag_r_add));  
   
   significand_s_normalized_rounded_aux <= ( unsigned('0' & std_logic_vector(significand_s_normalized)) + significand_add_one_with_carry );
-                    
-  mantissa_s <= unsigned(significand_s_normalized_rounded_aux(FP_LEN-(FP_EXP+1) downto 1)) 
-  when (significand_s_normalized_rounded_aux(FP_LEN - FP_EXP) = '1') 
+
+  mantissa_s <= to_unsigned(2**(FP_LEN-FP_EXP-1)-1,FP_LEN-(FP_EXP+1))
+  -- Overflow validation
+  when ((to_integer(exponent_a_plus_b)+to_integer(exponent_add_one))>(2**FP_EXP-2) and significand_s_normalized_rounded_aux(FP_LEN - FP_EXP)='1')
   -- Infinite value validation
   else to_unsigned(0,FP_LEN-(FP_EXP+1)) when flag_infinite = '1'
   -- Zero significand validation
   else to_unsigned(0,FP_LEN-(FP_EXP+1)) when flag_zero_significand = '1'
-  -- Overflow validation 
-  --else to_unsigned(2**(FP_LEN-FP_EXP-1)-1,FP_LEN-(FP_EXP+1)) when flag_overflow = '1'
   -- Underflow validation
   else to_unsigned(0,FP_LEN-(FP_EXP+1)) when flag_underflow ='1'
+  
+  else unsigned(significand_s_normalized_rounded_aux(FP_LEN-(FP_EXP+1) downto 1)) when (significand_s_normalized_rounded_aux(FP_LEN - FP_EXP) = '1') 
   else significand_s_normalized_rounded_aux(FP_LEN-(FP_EXP+1)-1 downto 0 );
   
   -- EXPONENT
-  exponent_s <= (exponent_a_plus_b + exponent_add_one)
-    when (significand_s_normalized_rounded_aux( FP_LEN - FP_EXP ) = '1')
+  exponent_s <= to_unsigned(2**FP_EXP-2,FP_EXP)
+    -- Overflow validation
+    when ((to_integer(exponent_a_plus_b)+to_integer(exponent_add_one))>(2**FP_EXP-2) and significand_s_normalized_rounded_aux(FP_LEN - FP_EXP)='1')
     -- Infinite value validation
     else to_unsigned(2**FP_EXP-1,FP_EXP) when flag_infinite = '1'
     -- Zero significand validation
     else to_unsigned(0,FP_EXP) when flag_zero_significand = '1'
-    -- Overflow validation
-    --else to_unsigned(2**FP_EXP-2,FP_EXP) when flag_overflow = '1'
     -- Underflow validation
     else to_unsigned(0,FP_EXP) when (flag_underflow = '1')
+
+    else (exponent_a_plus_b + exponent_add_one) when (significand_s_normalized_rounded_aux(FP_LEN - FP_EXP)='1')
     else exponent_a_plus_b;
   
   -- Concat sign + exp + mantissa

@@ -34,20 +34,38 @@ begin
     
     variable exp_shift: unsigned(FP_EXP-1 downto 0);
     variable p_reg: unsigned((FP_LEN-(FP_EXP+1)) downto 0);
-
+    variable idx: integer;
   begin
     exp_shift := (exponent_a - exponent_b);
 
     -- if sign_a != sign_b, then shift_right (exp_a - exp_b) bits with '1'
     -- else shift_right (exp_a - exp_b) bits  with '0' 
+    idx:=0;
     if (sign_a xor sign_b) = '1' then
-      p_reg((FP_LEN-(FP_EXP+1)) downto ((FP_LEN-(FP_EXP+1)) - to_integer(exp_shift)+ 1)) := ( others=> '1');
+      while (idx <= to_integer(exp_shift)+1 and idx <= (FP_LEN-(FP_EXP+1)) )  loop
+        p_reg((FP_LEN-(FP_EXP+1)) - idx) := '1';
+        idx := idx+1;
+      end loop;
     else
-      p_reg((FP_LEN-(FP_EXP+1)) downto ((FP_LEN-(FP_EXP+1)) - to_integer(exp_shift)+ 1)) := ( others=> '0');
+      while (idx <= to_integer(exp_shift)+1 and idx <= (FP_LEN-(FP_EXP+1)) )  loop
+        p_reg((FP_LEN-(FP_EXP+1)) - idx) := '0';
+        idx := idx+1;
+      end loop;
     end if ;
+
+    --if (sign_a xor sign_b) = '1' then
+    --  p_reg((FP_LEN-(FP_EXP+1)) downto ((FP_LEN-(FP_EXP+1)) - to_integer(exp_shift)+ 1)) := ( others=> '1');
+    --else
+    --  p_reg((FP_LEN-(FP_EXP+1)) downto ((FP_LEN-(FP_EXP+1)) - to_integer(exp_shift)+ 1)) := ( others=> '0');
+    --end if ;
     
     -- Append significand_b to the remaining bits of the p-register
-    p_reg((FP_LEN-(FP_EXP+1))-to_integer(exp_shift) downto 0) := significand_b((FP_LEN-(FP_EXP+1)) downto to_integer(exp_shift));
+    idx :=0;
+    while(idx <= (FP_LEN-(FP_EXP+1))-to_integer(exp_shift))loop
+      p_reg(idx) := significand_b(to_integer(exp_shift) + idx);
+      idx:= idx+1;
+    end loop;
+    
     
     -- bits shifted out of the p-register
     if to_integer(exp_shift)>0 then
