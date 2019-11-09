@@ -1,0 +1,21 @@
+23x6
+----
+Calculation performed 4069786 + 4063232 = 0 and the expected result was 4128767
+
+24x6
+----
+Calculation performed 8139571 + 8126464 = 0 and the expected result was 8257535
+
+25x7
+----
+Calculation performed 8002001 + 8121616 = 0 and the expected result was 8192880
+
+Calculation performed 16528179 + 16515072 = 0 and the expected result was 16646143
+
+26x7
+----
+Calculation performed 33056358 + 33030144 = 0 and the expected result was 33292287
+
+30x8
+----
+Calculation performed 532886323 + 532676608 = 0 and the expected result was 534773759
