@@ -61,19 +61,19 @@ significand_place: process (carry_out,significand_s,sign_a,sign_b,index_shift,fl
     
     -- significand_s & flag_g
     elsif (to_integer(index_shift)=1) then
-      significand_s_normalized <=  significand_s((FP_LEN-(FP_EXP+1))-1 downto 0) & '0' ;
+      significand_s_normalized <=  significand_s((FP_LEN-(FP_EXP+1))-1 downto 0) & flag_g ;
     
     -- significand_s & flag_g & 0..0 
     elsif (to_integer(index_shift)>=2) then
       idx :=0;    
       significand_s_normalized_aux := (others => '0');
-  
-      while (idx <= to_integer(index_shift) and idx <= (FP_LEN-(FP_EXP+1))) loop
-        significand_s_normalized_aux((FP_LEN-(FP_EXP+1)) - idx) := significand_s(to_integer(index_shift) - idx);
+      
+      while (idx <= (FP_LEN-(FP_EXP+1))-to_integer(index_shift) and idx <= (FP_LEN-(FP_EXP+1))) loop
+        significand_s_normalized_aux((FP_LEN-(FP_EXP+1)) - idx) := significand_s((FP_LEN-(FP_EXP+1))-to_integer(index_shift) - idx);
         idx := idx+1;
       end loop;
-      significand_s_normalized_aux(FP_LEN-(FP_EXP+1) - idx + 1) := flag_g;
-    
+      
+      significand_s_normalized_aux(FP_LEN-(FP_EXP+1) - idx) := flag_g;
       significand_s_normalized <= significand_s_normalized_aux(FP_LEN-(FP_EXP+1) downto 0);
     
     -- significand zero
@@ -83,11 +83,6 @@ significand_place: process (carry_out,significand_s,sign_a,sign_b,index_shift,fl
       significand_s_normalized <= (others => '0');
     end if;
   end process significand_place;
-
-  -- with carry and sign_a = sing_b
-  --exponent_a_plus_b <= ( exponent_a + to_unsigned(1,FP_EXP) )
-  --when ((sign_a xor sign_b)='0' and carry_out='1') 
-  --  else ( exponent_a - index_shift);
 
   -- Zero significand
   flag_zero_significand <= '1' when to_integer(significand_s)=0 else '0';
