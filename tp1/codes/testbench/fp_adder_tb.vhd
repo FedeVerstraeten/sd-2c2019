@@ -41,9 +41,10 @@ architecture fp_adder_tb_arch of fp_adder_tb is
   constant DELAY: natural:= 4;        -- DUT delay
   constant WORD_SIZE_T: natural:= 25; -- size float
   constant EXP_SIZE_T: natural:= 7;   -- size exponent
-  constant TEST_PATH: string :="/home/fverstra/Repository/sd-2c2019/tp1/test_files_2015/suma/";
-  constant TEST_FILE: string := TEST_PATH & "test_sum_float_25_7.txt";
-
+  constant TEST_PATH: string :="../test_files_2015/suma/";
+  constant TEST_FILE: string := TEST_PATH & "test_sum_float_"& integer'image(WORD_SIZE_T)
+                                & "_" & integer'image(EXP_SIZE_T) & ".txt";
+  
   -- File input
   file datos: text open read_mode is TEST_FILE;
 
@@ -56,10 +57,9 @@ architecture fp_adder_tb_arch of fp_adder_tb is
   signal z_del: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal z_dut: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
   
-  signal ciclos: integer := 0;
-  signal errores: integer := 0;
+  signal cycle: integer := 0;
+  signal errors: integer := 0;
   
-  -- se define por un problema de conversión
   signal a_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal b_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
   signal z_del_aux: std_logic_vector(WORD_SIZE_T-1 downto 0):= (others => '0');
@@ -85,7 +85,7 @@ architecture fp_adder_tb_arch of fp_adder_tb is
     );
   end component fp_adder;
 
-  -- Declaracion de la linea de retardo
+  -- Delay generator
   component delay_gen is
     generic(
       N: natural:= 32;
@@ -99,8 +99,8 @@ architecture fp_adder_tb_arch of fp_adder_tb is
   end component;
   
 begin
-  -- Generacion del clock del sistema
-  clk <= not(clk) after TCK/ 2; -- reloj
+  -- System clock generation
+  clk <= not(clk) after TCK/2;
 
   -- Read from test files
   Test_Sequence: process
@@ -131,11 +131,11 @@ begin
         "Fin de la simulacion" severity failure;
   end process Test_Sequence;
   
-  -- test_sum_float_25_7.txt
-  --a_tb <= std_logic_vector(to_unsigned(8002001,25));
-  --b_tb <= std_logic_vector(to_unsigned(8121616,25));
+  -- test_dif_float_25_7.txt
+  --a_tb <= std_logic_vector(to_unsigned(8153147,25));
+  --b_tb <= std_logic_vector(to_unsigned(24788495,25));
  
-  -- Instanciacion del DUT
+  -- DUT instance
   DUT: fp_adder
     generic map(
       FP_EXP => EXP_SIZE_T,
@@ -150,8 +150,8 @@ begin
       --b_in => b_tb,
       unsigned(s_out) => z_dut
     );
-
-  -- Instanciacion de la linea de retardo
+  
+  -- Delay instance
   del_a: delay_gen
       generic map(WORD_SIZE_T, DELAY)
       port map(clk, std_logic_vector(a_file), a_del_aux);
@@ -168,11 +168,13 @@ begin
   b_del <= unsigned(b_del_aux);
   z_del <= unsigned(z_del_aux);
   
-  --Verificacion de la condicion
+  -- Verification test
   verification: process(clk)
+    variable cycle_counter: integer := 0;
+    variable errors_counter: integer := 0;
   begin
     if falling_edge(clk) then
-      ciclos <= ciclos + 1;
+      cycle_counter:=cycle_counter+1;
       assert to_integer(z_del) = to_integer(z_dut)
         report "Calculation performed " & 
               integer'image(to_integer(unsigned(a_del))) & " + " &
@@ -180,15 +182,15 @@ begin
               integer'image(to_integer(z_dut)) & " and the expected result was " &
               integer'image(to_integer(unsigned(z_del)))
         severity warning;
-    else report
-      "Simulacion ok";
-      
-    if to_integer(z_del) /= to_integer(z_dut) then
-        errores <= errores + 1;
+      cycle <= cycle_counter;
+    else      
+      if to_integer(z_del) /= to_integer(z_dut) then
+        errors_counter:=errors_counter+1;
+        report "Ciclos = " & integer'image(cycle_counter) & ", " 
+                & "Errores = " & integer'image(errors_counter);
+        errors <= errors_counter;
       end if;
     end if;
-    report "Ciclos = " & integer'image(ciclos) & ", "
-      & "Errores =" & integer'image(errores);
   end process verification;
 
-end architecture fp_adder_tb_arch; 
+end architecture fp_adder_tb_arch;

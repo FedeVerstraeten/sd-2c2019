@@ -42,8 +42,9 @@ architecture fp_multiplier_tb_arch of fp_multiplier_tb is
   constant DELAY: natural:= 0;        -- DUT delay
   constant WORD_SIZE_T: natural:= 25; -- size float
   constant EXP_SIZE_T: natural:= 7;   -- size exponent
-  constant TEST_PATH: string :="/home/fverstra/Repository/sd-2c2019/tp1/test_files_2015/multiplicacion/";
-  constant TEST_FILE: string := TEST_PATH & "test_mul_float_25_7.txt";
+  constant TEST_PATH: string :="../test_files_2015/multiplicacion/";
+  constant TEST_FILE: string := TEST_PATH & "test_mul_float_"& integer'image(WORD_SIZE_T)
+                                & "_" & integer'image(EXP_SIZE_T) & ".txt";
 
   signal clk: std_logic:= '0';
   signal a_file: unsigned(WORD_SIZE_T-1 downto 0):= (others => '0');
