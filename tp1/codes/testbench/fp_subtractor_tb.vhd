@@ -186,8 +186,8 @@ begin
     else      
       if to_integer(z_del) /= to_integer(z_dut) then
         errors_counter:=errors_counter+1;
-        report "Ciclos = " & integer'image(cycle_counter) & ", " 
-                & "Errores = " & integer'image(errors_counter);
+        report "Cycle = " & integer'image(cycle_counter) & ", " 
+                & "Errors = " & integer'image(errors_counter);
         errors <= errors_counter;
       end if;
     end if;
