@@ -1,138 +1,91 @@
--------------------------------------------------------------------------------
---  
---  Copyright (c) 2009 Xilinx Inc.
---
---  Project  : Programmable Wave Generator
---  Module   : uart_rx.vhd
---  Parent   : wave_gen.vhd and uart_led.vhd
---  Children : uart_rx_ctl.vhd uart_baud_gen.vhd meta_harden.vhd
---
---  Description: 
---     Top level of the UART receiver.
---     Brings together the metastability hardener for synchronizing the 
---     rxd pin, the baudrate generator for generating the proper x16 bit
---     enable, and the controller for the UART itself.
---     
---
---  Parameters:
---     BAUD_RATE : Baud rate - set to 57,600bps by default
---     CLOCK_RATE: Clock rate - set to 50MHz by default
---
---  Local Parameters:
---
---  Notes       : 
---
---  Multicycle and False Paths
---     The uart_baud_gen module generates a 1-in-N pulse (where N is
---     determined by the baud rate and the system clock frequency), which
---     enables all flip-flops in the uart_rx_ctl module. Therefore, all paths
---     within uart_rx_ctl are multicycle paths, as long as N > 2 (which it
---     will be for all reasonable combinations of Baud rate and system
---     frequency).
---
-
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity uart_rx is
-	generic(
-		BAUD_RATE: integer := 115200; 	-- Baud rate
-		CLOCK_RATE: integer := 50E6
-	);
-	port(
-		-- Write side inputs
-		clk_rx: 		in std_logic;      				-- Clock input
-		rst_clk_rx: 	in std_logic;   				-- Active HIGH reset - synchronous to clk_rx		
-		rxd_i: 			in std_logic;      				-- RS232 RXD pin - Directly from pad
+   generic(
+      DBIT: integer:=8;     -- # data bits
+      SB_TICK: integer:=16  -- # ticks for stop bits
+   );
+   port(
+      clk, reset: in std_logic;
+      rx: in std_logic;
+      s_tick: in std_logic;
+      rx_done_tick: out std_logic;
+      dout: out std_logic_vector(7 downto 0)
+   );
+end uart_rx ;
 
-		rxd_clk_rx: 	out std_logic;					-- RXD pin after synchronization to clk_rx
-		rx_data: 		out std_logic_vector(7 downto 0);	-- 8 bit data output, valid when rx_data_rdy is asserted
-		rx_data_rdy: 	out std_logic;  				-- Ready signal for rx_data
-		frm_err: 		out std_logic      				-- The STOP bit was not detected	
-	);
-end;
-
-architecture uart_rx_arq of uart_rx is
-
-	component meta_harden is
-		port(
-			clk_dst: 	in std_logic;	-- Destination clock
-			rst_dst: 	in std_logic;	-- Reset - synchronous to destination clock
-			signal_src: in std_logic;	-- Asynchronous signal to be synchronized
-			signal_dst: out std_logic	-- Synchronized signal
-		);
-	end component;
-	
-	component uart_baud_gen is
-		generic(
-			BAUD_RATE: natural := 57600;	-- Baud rate
-			CLOCK_RATE: natural := 50E6
-
-		);
-		port(
-			-- Write side inputs
-			clk: 			in std_logic;       -- Clock input
-			rst: 			in std_logic;       -- Active HIGH reset - synchronous to clk
-			baud_x16_en: 	out std_logic   	-- Oversampled Baud rate enable
-		);
-	end component;
-	
-	component uart_rx_ctl is
-		port(
-			-- Write side inputs
-			clk_rx: 		in std_logic;   -- Clock input
-			rst_clk_rx: 	in std_logic;   -- Active HIGH reset - synchronous to clk_rx
-			baud_x16_en: 	in std_logic;  	-- 16x oversampling enable
-
-			rxd_clk_rx:		in std_logic;	-- RS232 RXD pin - after sync to clk_rx
-
-			rx_data:		out std_logic_vector(7 downto 0);	-- 8 bit data output
-																--  - valid when rx_data_rdy is asserted
-			rx_data_rdy:	out std_logic;	-- Ready signal for rx_data
-			frm_err:	    out std_logic	-- The STOP bit was not detected
-		
-		);
-	end component;
-
-
-	signal baud_x16_en: std_logic;			-- 1-in-N enable for uart_rx_ctl FFs
-	
-	signal rxd_clk_rx_aux: std_logic;		--	senal auxiliar
+architecture arch of uart_rx is
+   type state_type is (idle, start, data, stop);
+   signal state_reg, state_next: state_type;
+   signal s_reg, s_next: unsigned(3 downto 0);
+   signal n_reg, n_next: unsigned(2 downto 0);
+   signal b_reg, b_next: std_logic_vector(7 downto 0);
 begin
-	-- Synchronize the RXD pin to the clk_rx clock domain. Since RXD changes
-	-- very slowly wrt. the sampling clock, a simple metastability hardener is
-	-- sufficient
-	meta_harden_rxd_i0: meta_harden
-		port map(
-			clk_dst    => clk_rx,
-			rst_dst    => rst_clk_rx, 
-			signal_src => rxd_i,
-			signal_dst => rxd_clk_rx_aux
-		);
-
-	uart_baud_gen_rx_i0: uart_baud_gen
-		generic map(
-			BAUD_RATE => BAUD_RATE,
-			CLOCK_RATE => CLOCK_RATE
-		)
-		port map(
-			clk         => clk_rx,
-			rst         => rst_clk_rx,
-			baud_x16_en => baud_x16_en
-		);
-
-	uart_rx_ctl_i0: uart_rx_ctl
-		port map(
-			clk_rx      => clk_rx,
-			rst_clk_rx  => rst_clk_rx,
-			baud_x16_en => baud_x16_en,
-			rxd_clk_rx  => rxd_clk_rx_aux,
-			rx_data_rdy => rx_data_rdy,
-			rx_data     => rx_data,
-			frm_err     => frm_err
-		);
-		
-	rxd_clk_rx <= rxd_clk_rx_aux;
-
-end;
+   -- FSMD state & data registers
+   process(clk,reset)
+   begin
+      if reset='1' then
+         state_reg <= idle;
+         s_reg <= (others=>'0');
+         n_reg <= (others=>'0');
+         b_reg <= (others=>'0');
+      elsif (clk'event and clk='1') then
+         state_reg <= state_next;
+         s_reg <= s_next;
+         n_reg <= n_next;
+         b_reg <= b_next;
+      end if;
+   end process;
+   -- next-state logic & data path functional units/routing
+   process(state_reg,s_reg,n_reg,b_reg,s_tick,rx)
+   begin
+      state_next <= state_reg;
+      s_next <= s_reg;
+      n_next <= n_reg;
+      b_next <= b_reg;
+      rx_done_tick <='0';
+      case state_reg is
+         when idle =>
+            if rx='0' then
+               state_next <= start;
+               s_next <= (others=>'0');
+            end if;
+         when start =>
+            if (s_tick = '1') then
+               if s_reg=7 then
+                  state_next <= data;
+                  s_next <= (others=>'0');
+                  n_next <= (others=>'0');
+               else
+                  s_next <= s_reg + 1;
+               end if;
+            end if;
+         when data =>
+            if (s_tick = '1') then
+               if s_reg=15 then
+                  s_next <= (others=>'0');
+                  b_next <= rx & b_reg(7 downto 1) ;
+                  if n_reg=(DBIT-1) then
+                     state_next <= stop ;
+                  else
+                     n_next <= n_reg + 1;
+                  end if;
+               else
+                  s_next <= s_reg + 1;
+               end if;
+            end if;
+         when stop =>
+            if (s_tick = '1') then
+               if s_reg=(SB_TICK-1) then
+                  state_next <= idle;
+                  rx_done_tick <='1';
+               else
+                  s_next <= s_reg + 1;
+               end if;
+            end if;
+      end case;
+   end process;
+   dout <= b_reg;
+end arch;
