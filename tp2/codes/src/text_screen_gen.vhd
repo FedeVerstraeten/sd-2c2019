@@ -1,3 +1,32 @@
+----------------------------------------------------------------------------------
+-- Title: FIUBA - 66.17 Sistemas Digitales
+-- Project: TP2 - Recepción de caracteres por UART y visualización VGA
+----------------------------------------------------------------------------------
+-- Filename: text_screen_gen.vhd
+---------------------------------------------------------------------------------- 
+-- Author: Federico Verstraeten
+-- Design Name:    Text Screen Generator
+-- Module Name:    Text Screen Generator
+-- @Copyright (C):
+--    This file is part of 'TP2 - Recepción de caracteres por UART y visualización VGA'.
+--    Unauthorized copying or use of this file via any medium
+--    is strictly prohibited.
+----------------------------------------------------------------------------------
+-- Description: 
+--  Text generation circuit with tile memory.
+--  Green over black and reversed video for output symbols and cursor.
+----------------------------------------------------------------------------------
+-- Dependencies:
+--    font_rom.vhd
+--    xilinx_dual_port_ram_sync.vhd
+--
+----------------------------------------------------------------------------------
+-- Revision: 
+-- Revision 1.0
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -5,8 +34,8 @@ use ieee.numeric_std.all;
 entity text_screen_gen is
    port(
       clk, reset: in std_logic;
-      writeEnable: in std_logic;
-      dataIN: in std_logic_vector(6 downto 0);
+      write_enable: in std_logic;
+      data_in: in std_logic_vector(6 downto 0);
       video_on: in std_logic;
       pixel_x, pixel_y: in std_logic_vector(9 downto 0);
       text_rgb: out std_logic_vector(2 downto 0)
@@ -14,6 +43,9 @@ entity text_screen_gen is
 end text_screen_gen;
 
 architecture arch of text_screen_gen is
+   -- 80-by-30 tile map
+   constant MAX_X: integer:=80;
+   constant MAX_Y: integer:=30;
    -- font ROM
    signal char_addr: std_logic_vector(6 downto 0);
    signal rom_addr: std_logic_vector(10 downto 0);
@@ -25,9 +57,6 @@ architecture arch of text_screen_gen is
    signal we: std_logic;
    signal addr_r, addr_w: std_logic_vector(11 downto 0);
    signal din, dout: std_logic_vector(6 downto 0);
-   -- 80-by-30 tile map
-   constant MAX_X: integer:=80;
-   constant MAX_Y: integer:=30;
    -- cursor
    signal cur_x_reg, cur_x_next: unsigned(6 downto 0);
    signal cur_y_reg, cur_y_next: unsigned(4 downto 0);
@@ -40,22 +69,38 @@ architecture arch of text_screen_gen is
    signal font_rgb, font_rev_rgb:
             std_logic_vector(2 downto 0);
 begin
-   move_x_tick <=
-      '1' when writeEnable='1' else
-      '0' ;
-   move_y_tick <=
-      '1' when writeEnable='1' and
-                        cur_x_reg=MAX_X-1 else
-      '0' ;
+   move_x_tick <='1'
+      when write_enable='1' 
+      else'0';
+
+   move_y_tick <= '1' 
+      when write_enable='1' and cur_x_reg=MAX_X-1 
+      else '0';
+
    -- instantiate font ROM
    font_unit: entity work.font_rom
-      port map(clk=>clk, addr=>rom_addr, data=>font_word);
+      port map(
+         clk=>clk, 
+         addr=>rom_addr, 
+         data=>font_word
+      );
+
    -- instantiate dual port tile RAM (2^12-by-7)
    video_ram: entity work.xilinx_dual_port_ram_sync
-      generic map(ADDR_WIDTH=>12, DATA_WIDTH=>7)
-      port map(clk=>clk, we=>we,
-               addr_a=>addr_w, addr_b=>addr_r,
-               din_a=>din, dout_a=>open, dout_b=>dout);
+      generic map(
+         ADDR_WIDTH=>12,
+         DATA_WIDTH=>7
+      )
+      port map(
+         clk=>clk, 
+         we=>we,
+         addr_a=>addr_w, 
+         addr_b=>addr_r,
+         din_a=>din, 
+         dout_a=>open, 
+         dout_b=>dout
+      );
+
    -- registers
    process (clk)
    begin
@@ -68,39 +113,46 @@ begin
          pix_y2_reg <= pix_y1_reg;
      end if;
    end process;
+
    -- tile RAM write
    addr_w <=std_logic_vector(cur_y_reg & cur_x_reg);
-   we <= writeEnable;
-   din <= dataIN;
+   we <= write_enable;
+   din <= data_in;
+   
    -- tile RAM read
    -- use non-delayed coordinates to form tile RAM address
    addr_r <=pixel_y(8 downto 4) & pixel_x(9 downto 3);
    char_addr <= dout;
+   
    -- font ROM
    row_addr<=pixel_y(3 downto 0);
    rom_addr <= char_addr & row_addr;
+   
    -- use delayed coordinate to select a bit
    bit_addr<=pix_x2_reg(2 downto 0);
    font_bit <= font_word(to_integer(not bit_addr));
+   
    -- new cursor position
-   cur_x_next <=
-      (others=>'0') when move_x_tick='1' and -- wrap around
-                         cur_x_reg=MAX_X-1 else
-      cur_x_reg + 1  when move_x_tick='1' else
-      cur_x_reg ;
-   cur_y_next <=
-      (others=>'0') when move_y_tick='1' and -- wrap around
-                         cur_y_reg=MAX_Y-1 else
-      cur_y_reg + 1  when move_y_tick='1' else
-      cur_y_reg;
+   cur_x_next <= (others=>'0') 
+      when move_x_tick='1' and cur_x_reg=MAX_X-1 -- wrap around
+      else cur_x_reg + 1 when move_x_tick='1' 
+      else cur_x_reg ;
+
+   cur_y_next <= (others=>'0')
+      when move_y_tick='1' and cur_y_reg=MAX_Y-1 -- wrap around
+      else cur_y_reg + 1 when move_y_tick='1'
+      else cur_y_reg;
+
    -- object signals
    -- green over black and reversed video for courser
-   font_rgb <="010" when font_bit='1' else "000";
-   font_rev_rgb <="000" when font_bit='1' else "010";
+   font_rgb <= "010" when font_bit='1' else "000";
+   font_rev_rgb <= "000" when font_bit='1' else "010";
+   
    -- use delayed coordinates for comparison
-   cursor_on <='1' when pix_y2_reg(8 downto 4)=cur_y_reg and
-                        pix_x2_reg(9 downto 3)=cur_x_reg else
-               '0';
+   cursor_on <= '1' 
+      when pix_y2_reg(8 downto 4)=cur_y_reg and pix_x2_reg(9 downto 3)=cur_x_reg 
+      else '0';
+   
    -- rgb multiplexing circuit
    process(video_on,cursor_on,font_rgb,font_rev_rgb)
    begin

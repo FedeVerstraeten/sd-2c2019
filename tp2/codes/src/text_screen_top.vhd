@@ -54,22 +54,26 @@ architecture arch of text_screen_top is
    signal video_on, pixel_tick: std_logic;
    signal sys_clk: std_logic;
    signal rgb_reg, rgb_next: std_logic_vector(2 downto 0);
-   signal writeEnable: std_logic;
-   signal dataIN: std_logic_vector(7 downto 0);
+   signal write_enable: std_logic;
+   signal data_in: std_logic_vector(7 downto 0);
 begin
 
     clk_manager: entity work.clock_manager_wrapper
-    port map(       
-        sys_clk=>sys_clk,
+    port map(
+        -- IN
         reset=>reset,
-        sys_clk_pin=>sys_clk_pin
+        sys_clk_pin=>sys_clk_pin,
+        -- OUT
+        sys_clk=>sys_clk
     );
 
    -- VGA sync circuit instance
     vga_sync_unit: entity work.vga_sync
     port map(
+        -- IN
         clk=>sys_clk,
         reset=>reset,
+        -- OUT
         hsync=>hsync,
         vsync=>vsync,
         video_on=>video_on,
@@ -78,25 +82,32 @@ begin
         pixel_y=>pixel_y
     );
    
+    -- UART circuit
+    -- baud rate (default) 19,200
+    -- clock rate 5 MHz
     uart_rx: entity work.uart
     port map(
+        -- IN
         clk => sys_clk,
         reset => reset,
         rx => rxd_pin,
-        r_data => dataIN,
-        rx_ready => writeEnable
+        -- OUT
+        r_data => data_in,
+        rx_ready => write_enable
     );
     
    -- full-screen text generator instance
     text_gen_unit: entity work.text_screen_gen
     port map(
+        -- IN
         clk=>sys_clk,
         reset=>reset,
-        writeEnable=>writeEnable,
-        dataIN=>dataIN(6 downto 0),
+        write_enable=>write_enable,
+        data_in=>data_in(6 downto 0),
         video_on=>video_on,
         pixel_x=>pixel_x,
         pixel_y=>pixel_y,
+        -- OUT
         text_rgb=>rgb_next
     );
     

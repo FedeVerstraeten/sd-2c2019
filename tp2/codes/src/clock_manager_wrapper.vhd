@@ -1,3 +1,31 @@
+----------------------------------------------------------------------------------
+-- Title: FIUBA - 66.17 Sistemas Digitales
+-- Project: TP2 - Recepción de caracteres por UART y visualización VGA
+----------------------------------------------------------------------------------
+-- Filename: clock_manager_wrapper.vhd
+---------------------------------------------------------------------------------- 
+-- Author: Federico Verstraeten
+-- Design Name:    Clock Manager Wrapper
+-- Module Name:    Clock Manager Wrapper
+-- @Copyright (C):
+--    This file is part of 'TP2 - Recepción de caracteres por UART y visualización VGA'.
+--    Unauthorized copying or use of this file via any medium
+--    is strictly prohibited.
+----------------------------------------------------------------------------------
+-- Description: 
+--  Wrapper of  IPblock clk_wiz_0 component
+----------------------------------------------------------------------------------
+-- Dependencies:
+--  IP block clk_wiz_0
+--  input freq = 125 MHz
+--  output freq = 5 MHz
+----------------------------------------------------------------------------------
+-- Revision: 
+-- Revision 1.0
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 library unisim;

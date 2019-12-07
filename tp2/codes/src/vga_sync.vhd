@@ -1,3 +1,29 @@
+----------------------------------------------------------------------------------
+-- Title: FIUBA - 66.17 Sistemas Digitales
+-- Project: TP2 - Recepción de caracteres por UART y visualización VGA
+----------------------------------------------------------------------------------
+-- Filename: vga_sync.vhd
+---------------------------------------------------------------------------------- 
+-- Author: Federico Verstraeten
+-- Design Name:    VGA sync controller
+-- Module Name:    VGA sync controller
+-- @Copyright (C):
+--    This file is part of 'TP2 - Recepción de caracteres por UART y visualización VGA'.
+--    Unauthorized copying or use of this file via any medium
+--    is strictly prohibited.
+----------------------------------------------------------------------------------
+-- Description: 
+--
+----------------------------------------------------------------------------------
+-- Dependencies:
+--
+----------------------------------------------------------------------------------
+-- Revision: 
+-- Revision 1.0
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;

@@ -13,16 +13,19 @@
 --    is strictly prohibited.
 ----------------------------------------------------------------------------------
 -- Description: 
--- Baud Rate = 115200
+-- Baud Rate = 19200
 -- Clock rate = 50 us
 ----------------------------------------------------------------------------------
 -- Dependencies:
+--    mod_m_counter.vhd
+--    uart_rx.vhd
 ----------------------------------------------------------------------------------
 -- Revision: 
 -- Revision 1.0
 -- Additional Comments: 
 --
 ----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -34,7 +37,7 @@ entity uart is
     DBIT: integer:=8;     -- # data bits  
     SB_TICK: integer:=16; -- # ticks for stop bits, 16/24/32
                           --   for 1/1.5/2 stop bits
-    DVSR: integer:= 163; --210;--163;  -- baud rate divisor
+    DVSR: integer:= 163;  -- baud rate divisor
                           -- DVSR = 50M/(16*baud rate)
     DVSR_BIT: integer:=8 -- # bits of DVSR
    );
