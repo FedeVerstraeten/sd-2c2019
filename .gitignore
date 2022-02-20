@@ -2,4 +2,8 @@
 *.o
 *.cf
 
-# Folder
+# Vivado
+*.bit
+
+# Folders
+tmp/
