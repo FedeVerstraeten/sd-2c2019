@@ -46,9 +46,9 @@ begin
 process(clk)
 begin
     if (ent(0) and ent(1)) = '1' then
-        sal <= "01101100";
+        sal <= "01100110";
     else
-        sal <= "00000000";
+        sal <= "10011001";
     end if;
 end process;
 

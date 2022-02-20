@@ -5,6 +5,9 @@
 #
 # This script is modification of Pavel Demin's project.tcl and block_design.tcl files
 # by Anton Potocnik, 02.10.2016
+#
+# # This script is modification of apotocnik/redpitaya_guide project using VHDL source codes
+# by Federico Verstraeten, 20.02.2022
 # ==================================================================================================
 
 
@@ -49,8 +52,8 @@ endgroup
 
 # Buffers for differential IOs
 startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf util_ds_buf_0
-set_property -dict [list CONFIG.C_SIZE {2}] [get_bd_cells util_ds_buf_0]
+# create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf util_ds_buf_0
+# set_property -dict [list CONFIG.C_SIZE {2}] [get_bd_cells util_ds_buf_0]
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf util_ds_buf_1
 set_property -dict [list CONFIG.C_SIZE {2}] [get_bd_cells util_ds_buf_1]
@@ -60,18 +63,6 @@ set_property -dict [list CONFIG.C_SIZE {2}] [get_bd_cells util_ds_buf_2]
 set_property -dict [list CONFIG.C_BUF_TYPE {OBUFDS}] [get_bd_cells util_ds_buf_2]
 endgroup
 
-# binary counter
-# startgroup
-# create_bd_cell -type ip -vlnv xilinx.com:ip:c_counter_binary c_counter_binary_0
-# set_property -dict [list CONFIG.Output_Width {32}] [get_bd_cells c_counter_binary_0]
-# endgroup
-
-# slice
-# startgroup
-# create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice xlslice_0
-# set_property -dict [list CONFIG.DIN_TO {26} CONFIG.DIN_FROM {26} CONFIG.DIN_FROM {26} CONFIG.DOUT_WIDTH {1}] [get_bd_cells xlslice_0]
-# endgroup
-
 # We will use all LEDs
 set_property LEFT 7 [get_bd_ports led_o]
 
@@ -80,6 +71,7 @@ startgroup
 create_bd_cell -type module -reference led1 led1_0
 endgroup
 
+# Set as top led1
 update_compile_order -fileset sources_1
 set_property top led1 [get_filesets sim_1]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
@@ -90,8 +82,8 @@ reset_run synth_1
 # ====================================================================================
 # Connections 
 
-connect_bd_net [get_bd_ports adc_clk_p_i] [get_bd_pins util_ds_buf_0/IBUF_DS_P]
-connect_bd_net [get_bd_ports adc_clk_n_i] [get_bd_pins util_ds_buf_0/IBUF_DS_N]
+# connect_bd_net [get_bd_ports adc_clk_p_i] [get_bd_pins util_ds_buf_0/IBUF_DS_P]
+# connect_bd_net [get_bd_ports adc_clk_n_i] [get_bd_pins util_ds_buf_0/IBUF_DS_N]
 connect_bd_net [get_bd_ports daisy_p_i] [get_bd_pins util_ds_buf_1/IBUF_DS_P]
 connect_bd_net [get_bd_ports daisy_n_i] [get_bd_pins util_ds_buf_1/IBUF_DS_N]
 connect_bd_net [get_bd_ports daisy_p_o] [get_bd_pins util_ds_buf_2/OBUF_DS_P]
@@ -99,9 +91,6 @@ connect_bd_net [get_bd_ports daisy_n_o] [get_bd_pins util_ds_buf_2/OBUF_DS_N]
 connect_bd_net [get_bd_pins util_ds_buf_1/IBUF_OUT] [get_bd_pins util_ds_buf_2/OBUF_IN]
 apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 -config {make_external "FIXED_IO, DDR" Master "Disable" Slave "Disable" }  [get_bd_cells processing_system7_0]
 
-# connect_bd_net [get_bd_pins c_counter_binary_0/Q] [get_bd_pins xlslice_0/Din]
-# connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins c_counter_binary_0/CLK]
-# connect_bd_net [get_bd_ports led_o] [get_bd_pins xlslice_0/Dout]
 
 connect_bd_net [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins processing_system7_0/FCLK_CLK0]
 connect_bd_net [get_bd_pins processing_system7_0/S_AXI_HP0_ACLK] [get_bd_pins processing_system7_0/FCLK_CLK0]
