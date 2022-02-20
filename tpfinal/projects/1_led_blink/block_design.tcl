@@ -34,9 +34,10 @@ if {[llength $files] > 0} {
 }
 
 # Load any additional VHDL files in the project folder
-set files [glob -nocomplain projects/$project_name/*.vhd projects/$project_name/*.vhdl]
+set files [glob -nocomplain projects/$project_name/*.vhd]
 if {[llength $files] > 0} {
-  add_files -norecurse $files
+  import_files -norecurse $files
+  # add_files -norecurse 
 }
 
 # Zynq processing system with RedPitaya specific preset
@@ -76,7 +77,7 @@ set_property LEFT 7 [get_bd_ports led_o]
 
 # Add two rtl modules - leds VHDL
 startgroup
-create_bd_cell -type module -reference leds led1_0
+create_bd_cell -type module -reference led1 led1_0
 endgroup
 
 update_compile_order -fileset sources_1
