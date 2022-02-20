@@ -27,6 +27,17 @@ source cfg/ports.tcl
 set_property IP_REPO_PATHS tmp/cores [current_project]
 update_ip_catalog
 
+# Load any additional Verilog files in the project folder
+set files [glob -nocomplain projects/$project_name/*.v projects/$project_name/*.sv]
+if {[llength $files] > 0} {
+  add_files -norecurse $files
+}
+
+# Load any additional VHDL files in the project folder
+set files [glob -nocomplain projects/$project_name/*.vhd projects/$project_name/*.vhdl]
+if {[llength $files] > 0} {
+  add_files -norecurse $files
+}
 
 # Zynq processing system with RedPitaya specific preset
 startgroup
@@ -105,12 +116,6 @@ generate_target all [get_files  $bd_path/system.bd]
 
 make_wrapper -files [get_files $bd_path/system.bd] -top
 add_files -norecurse $bd_path/hdl/system_wrapper.v
-
-# Load any additional Verilog files in the project folder
-set files [glob -nocomplain projects/$project_name/*.v projects/$project_name/*.sv]
-if {[llength $files] > 0} {
-  add_files -norecurse $files
-}
 
 # Load RedPitaya constraint files
 set files [glob -nocomplain cfg/*.xdc]
