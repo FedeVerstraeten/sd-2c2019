@@ -58,6 +58,10 @@ cat /opt/redpitaya/fpga/fpga_X.XX.bit > /dev/xdevcfg
 ```
 
 
-# Trabajo práctico Nº2 (dd/mm/2019):
+# Trabajo práctico Nº2 (10/12/2019):
 
-# Trabajo práctico Nº1 (dd/mm/2019):
+Ver informe asociado [**6617_tp2_2c2019_report.pdf**](./tp2/6617_tp2_2c2019_report.pdf).
+
+# Trabajo práctico Nº1 (10/11/2019):
+
+Ver informe asociado [**6617_tp1_2c2019_report.pdf**](./tp1/6617_tp1_2c2019_report.pdf).
