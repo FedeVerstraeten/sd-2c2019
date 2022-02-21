@@ -2,6 +2,24 @@
 
 [6617/8641] - Sistemas Digitales
 
+# Pre requisitos:
+
+- Usar un sistema en base GNU/Linux. Para este desarrollo se usó inicialmente Ubuntu 14.04 y luego 20.04.
+- Instalar `git` y preferentemente `ssh` para descargar este repositorio.
+- Instalar `ghdl` VHDL compiler/simulator. En Ubuntu 20.04: 
+
+```bash
+$ sudo apt install ghdl
+```
+
+- Instalar la herramienta de visualización `gtkwave` para señales digitales (ejemplos: VCD, LXT, LXT2, VZT, FST, GHW). En Ubuntu 20.04:
+
+```bash
+$ sudo apt install gtkwave
+```
+
+- Instalar el software de sintetización e implementación de circuitos digitales *Vivado*. Se descarga desde la web oficial de Xilinx posterior resgistración, es multiplataforma y pesa varios Gigabytes.
+
 # Trabajo práctico final (xx/02/2022):
 
 ## Red Pitaya FPGA Project 1 – LED Blinker
