@@ -45,8 +45,8 @@ architecture p of nco_tb is
 begin
 	clk <= not clk after 20 ns;
 	rst <= '0' after 60 ns;
-	paso_prueba <= "0101";
-	--paso_prueba <= "0011", "1000" after 1000 us, "1100" after 2000 us, "0001" after 3000 us;
+	-- paso_prueba <= "0101";
+	paso_prueba <= "0011", "1000" after 1000 us, "1100" after 2000 us, "0001" after 3000 us;
 	
 	nco_inst: nco generic map(DATA_W, ADDR_W, PUNTOS, PASO_W) port map(clk, '0', paso_prueba, sin_o, cos_o);
 	
