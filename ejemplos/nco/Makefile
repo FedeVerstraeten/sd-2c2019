@@ -11,6 +11,7 @@ GHDL_FLAGS  = --ieee=synopsys --warn-no-vital-generic
 
 # Simulation break condition
 #GHDL_SIM_OPT = --assert-level=error
+# GHDL_SIM_OPT = --stop-time=100us
 GHDL_SIM_OPT = --stop-time=5ms
 
 # Working directories
