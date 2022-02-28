@@ -9,6 +9,6 @@
 # by Anton Potocnik, 02.10.2016 - 14.12.2017
 # ==================================================================================================
 
-set project_name "4_frequency_counter"
+set project_name "4_NCO_frequency_counter"
 
 source projects/$project_name/block_design.tcl
