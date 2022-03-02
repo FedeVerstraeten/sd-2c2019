@@ -52,5 +52,4 @@ view:
 
 clean :
 	$(GHDL_CMD) --clean --workdir=simulation
-	rm -f ./*.o $(SIMDIR)/*.o $(SIMDIR)/*.cf $(SIMDIR)/*.vcdgz $(SIMDIR)/*_tb
-
+	rm -f ./*.o $(SIMDIR)/*.o $(SIMDIR)/*.cf $(SIMDIR)/*.vcdgz $(SIMDIR)/*_tb ./nco_*_output.txt
